@@ -1,0 +1,8 @@
+streamlit
+langchain
+langchain-text-splitters
+streamlit_pdf_viewer
+sentence-transformers
+chromadb
+PyPDF2
+together
