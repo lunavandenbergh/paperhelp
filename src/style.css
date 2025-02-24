@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap'); 
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Poppins&family=Raleway:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Noto+Sans+Mono:wght@100..900&family=Poppins&family=Raleway:wght@600&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Poppins', serif; 
+    font-size: 15px;
+    font-weight: 400;
+    color: #091747;
+}

@@ -15,7 +15,7 @@ def get_corrections(tool, text):
 
 def highlight_text(text, corrections):
     highlighted_text = text
-    for correction in sorted(corrections, key=lambda x: x["offset"], reverse=True):  
+    for correction in sorted(corrections, key=lambda x: x["offset"], reverse=True):
         start = correction["offset"]
         end = start + correction["length"]
         error_text = text[start:end]
@@ -23,20 +23,19 @@ def highlight_text(text, corrections):
         if correction["type"] == "misspelling":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="background-color: pink;" title="{suggestion}">{error_text}</span>' +
+                f'<span style="border: 3px solid pink;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
             )
         elif correction["type"] == "grammar":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="background-color: lightblue;" title="{suggestion}">{error_text}</span>' +
+                f'<span style="border: 3px solid powderblue;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
             )
         else:
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="background-color: lightgreen;" title="{suggestion}">{error_text}</span>' +
+                f'<span style="border: 3px solid lightgreen;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
-        )
-
+            )
     return highlighted_text

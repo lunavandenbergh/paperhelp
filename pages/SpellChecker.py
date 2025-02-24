@@ -1,3 +1,5 @@
+import time
+import pymupdf4llm
 import streamlit as st
 import language_tool_python
 import re
@@ -11,10 +13,13 @@ from src.generate_response import generate_response
 from src.process_pdf import create_embeddings, extract_text_from_pdf, split_text, store_embeddings
 
 st.set_page_config(
-    page_title="Spelling and grammar checker", 
+    page_title="Scientific Writing: Feedback Tool", 
     page_icon="📄",
     initial_sidebar_state="expanded",
     layout="wide")
+
+with open( "src/style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 client = Together(api_key=st.secrets["TOGETHER_API_KEY"])
 chroma_client = chromadb.PersistentClient()
@@ -24,7 +29,10 @@ if "feedback_type" not in st.session_state:
 
 if "text" not in st.session_state:
     pdf_path = st.session_state.get("pdf_path", None)
-    text = extract_text_from_pdf("files/test_abstract.pdf")
+    text = pymupdf4llm.to_markdown("files/test_paper.pdf")
+    # Remove newlines within paragraphs
+    text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
+    # Join hyphenated words
     text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text)
     st.session_state["text"] = text
 
@@ -66,7 +74,8 @@ with left_col:
     with text_container:
         ## ANNOTATIONS ##
         corrections = st.session_state["corrections"]
-        st.markdown(highlight_text(st.session_state["text"], corrections), unsafe_allow_html=True)
+        highlighted_text = highlight_text(st.session_state["text"], corrections)
+        st.markdown(highlighted_text, unsafe_allow_html=True)
     
     chat = st.container(height=300)
     with chat:
@@ -82,7 +91,13 @@ with left_col:
             with st.chat_message("assistant"):
                 with st.spinner("Thinking of a response..."):
                     response = generate_response(prompt,model,collection, client)
-                st.write(response)
+                    
+                    def stream_response():
+                        for word in response.split(" "):
+                            yield word + " "
+                            time.sleep(0.03)
+                            
+                st.write_stream(stream_response())
             st.session_state.messages.append({"role": "assistant", "content": response})
     
 with right_col:
@@ -100,14 +115,15 @@ with right_col:
             start = correction["offset"]
             end = start + correction["length"]
             error_word = st.session_state["text"][start:end]
+            suggestion = ", ".join(correction["suggestion"])
             if correction["type"] == "misspelling":
-                st.markdown(f"<mark style='background-color: pink;'>{error_word}</mark> - **Spelling mistake**", unsafe_allow_html=True)
+                st.markdown(f"<span style='border: 3px solid pink;' title='{suggestion}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
             elif correction["type"] == "grammar":
-                st.markdown(f"<mark style='background-color: lightblue;'>{error_word}</mark> - **Grammar mistake**", unsafe_allow_html=True)
+                st.markdown(f"<span style='border: 3px solid lightblue;' title='{suggestion}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
     with tab3:
         for correction in corrections:
             start = correction["offset"]
             end = start + correction["length"]
             error_word = st.session_state["text"][start:end]
             if correction["type"] == "style":
-                st.markdown(f"<mark style='background-color: lightgreen;'>{error_word}</mark> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)
+                st.markdown(f"<span style='border: 3px solid lightgreen;'>{error_word}</span> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)

@@ -11,6 +11,9 @@ hide_sidebar = """
 """
 st.markdown(hide_sidebar, unsafe_allow_html=True)
 
+with open( "src/style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+    
 st.title("Welcome!")
 st.write("Upload a PDF to process it.")
 
