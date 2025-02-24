@@ -2,3 +2,5 @@
 /chroma
 /__pycache__
 /.streamlit
+/files
+/src/__pycache__

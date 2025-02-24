@@ -4,8 +4,8 @@ from together import Together
 import chromadb
 # TODO add license(s)
 from streamlit_pdf_viewer import pdf_viewer
-from generate_response import generate_response
-from process_pdf import create_embeddings, extract_text_from_pdf, split_text, store_embeddings
+from src.generate_response import generate_response
+from src.process_pdf import create_embeddings, extract_text_from_pdf, split_text, store_embeddings
 
 st.set_page_config(
     page_title="Chat with your PDF!", 
