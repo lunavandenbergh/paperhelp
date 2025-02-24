@@ -35,7 +35,7 @@ def highlight_text(text, corrections):
         else:
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="background-color: yellow;" title="{suggestion}">{error_text}</span>' +
+                f'<span style="background-color: lightgreen;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
         )
 

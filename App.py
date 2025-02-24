@@ -36,4 +36,4 @@ if uploaded_file:
 
     st.session_state["pdf_path"] = save_path
 
-    st.switch_page("pages/Chat.py")
+    st.switch_page("pages/SpellChecker.py")
