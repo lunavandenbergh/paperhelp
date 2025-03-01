@@ -1,8 +1,10 @@
+from sentence_transformers import SentenceTransformer
 import streamlit as st
 
 
 # Find the most relevant chunks of the pdf, compared to user question, in the existing embeddings
-def find_relevant_chunks(question, model, collection, top_k=3):
+def find_relevant_chunks(question, collection, top_k=3):
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     question_embedding = model.encode([question]).tolist()
     results = collection.query(
         query_embeddings=question_embedding,

@@ -3,20 +3,23 @@ import pymupdf4llm
 import streamlit as st
 import language_tool_python
 import re
+from src.find_arguments import	generate_arguments
 from src.process_pdf import extract_text_from_pdf
 from src.text_corrections import get_corrections, highlight_text
 from sentence_transformers import SentenceTransformer	
 from together import Together
 import chromadb
-# TODO add license(s)
 from src.generate_response import generate_response
 from src.process_pdf import create_embeddings, extract_text_from_pdf, split_text, store_embeddings
+import json
 
 st.set_page_config(
     page_title="Scientific Writing: Feedback Tool", 
     page_icon="📄",
     initial_sidebar_state="expanded",
     layout="wide")
+
+tic_overall = time.time()
 
 with open( "src/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
@@ -28,18 +31,26 @@ if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "Arguments"
 
 if "text" not in st.session_state:
+    tic = time.time()
     pdf_path = st.session_state.get("pdf_path", None)
-    text = pymupdf4llm.to_markdown("files/test_paper.pdf")
+    pdf_path = pdf_path.split('uploads\\', 1)[-1]
+    new_pdf_path = f"files/{pdf_path}"
+    text = pymupdf4llm.to_markdown(new_pdf_path)
     # Remove newlines within paragraphs
     text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
     # Join hyphenated words
     text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text)
     st.session_state["text"] = text
+    toc = time.time()
+    print(f"Text extraction took {toc - tic:.2f} seconds")
 
 if "corrections" not in st.session_state:
+    tic = time.time()
     tool = language_tool_python.LanguageTool('en-US')
     # Join hyphenated words (otherwise they will be treated as separate words and probably incorrect)
     st.session_state["corrections"] = get_corrections(tool, st.session_state["text"])
+    toc = time.time()
+    print(f"Text correction took {toc - tic:.2f} seconds")
 
 # Set a default model
 if "togetherai_model" not in st.session_state:
@@ -50,6 +61,16 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
     st.session_state.messages.append({"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or anything else."})
 
+if "arguments" not in st.session_state:
+    tic = time.time()
+    arguments = generate_arguments(True, client)
+    st.session_state["arguments"] = arguments
+    toc = time.time()
+    print(f"Argument generation took {toc - tic:.2f} seconds")
+
+#if "embeddings" not in st.session_state:
+    
+
 st.title("Scientific Writing Feedback Tool")
 
 # Input pdf field
@@ -57,7 +78,6 @@ pdf_path = st.session_state.get("pdf_path", None)
 pdf_text = extract_text_from_pdf(pdf_path)
 chunks = split_text(pdf_text)
 
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 embeddings = []
 embeddings = create_embeddings(chunks)
 
@@ -90,7 +110,7 @@ with left_col:
                 st.write(prompt)
             with st.chat_message("assistant"):
                 with st.spinner("Thinking of a response..."):
-                    response = generate_response(prompt,model,collection, client)
+                    response = generate_response(prompt,collection, client)
                     
                     def stream_response():
                         for word in response.split(" "):
@@ -106,10 +126,15 @@ with right_col:
     corrections = st.session_state["corrections"]
     feedback_type = st.session_state["feedback_type"]
     with tab1:
-        for correction in corrections:
-            if correction["type"] == "Arguments":
-            # TODO Display argument feedback
-                continue
+        arguments = st.session_state["arguments"]
+        for argument in arguments["arguments"]:
+            st.write(f"**{argument['context']}**")
+            st.markdown(f"- **Claim**: {argument['parts']['claim']}")
+            st.markdown(f"- **Evidence**: {argument['parts']['evidence']}")
+            st.markdown(f"- **Counterargument**: {argument['parts']['counterargument']}")
+            st.markdown(f"- **Feedback**: {argument['feedback']}")
+            st.markdown(f"- **Actionable feedback**: {argument['actionable_feedback']}")
+            st.divider()
     with tab2:
         for correction in corrections:
             start = correction["offset"]
@@ -127,3 +152,6 @@ with right_col:
             error_word = st.session_state["text"][start:end]
             if correction["type"] == "style":
                 st.markdown(f"<span style='border: 3px solid lightgreen;'>{error_word}</span> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)
+
+toc_overall = time.time()
+print(f"Overall execution time: {toc_overall - tic_overall:.2f} seconds")
