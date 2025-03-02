@@ -1,5 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
+import json
 import time
+from openai import OpenAI
 import pymupdf4llm
 import streamlit as st
 import language_tool_python
@@ -7,7 +9,6 @@ import re
 from src.find_arguments import	generate_arguments
 from src.process_pdf import extract_text_from_pdf
 from src.text_corrections import get_corrections, highlight_text
-from together import Together
 import chromadb
 from src.generate_response import generate_response
 from src.process_pdf import create_embeddings, extract_text_from_pdf, split_text, store_embeddings
@@ -47,18 +48,20 @@ if "corrections" not in st.session_state:
     toc = time.time()
     print(f"Text correction took {toc - tic:.2f} seconds")
 
-if "togetherai_model" not in st.session_state:
-    st.session_state["togetherai_model"] = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-    client = Together(api_key=st.secrets["TOGETHER_API_KEY"])
+if "openai_model" not in st.session_state:
+    st.session_state["openai_model"] = "gpt-4o-mini"
+    openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    st.session_state["openai_client"] = openai_client
     chroma_client = chromadb.PersistentClient()
+    st.session_state["chroma_client"] = chroma_client
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or anything else."}]
 
 if "arguments" not in st.session_state:
     tic = time.time()
-    arguments = generate_arguments(True, client)
-    st.session_state["arguments"] = arguments
+    arguments = generate_arguments(False, st.session_state["openai_client"])
+    st.session_state["arguments"] = eval(arguments)
     toc = time.time()
     print(f"Argument generation took {toc - tic:.2f} seconds")
 
@@ -76,7 +79,9 @@ if "processpdf" not in st.session_state or st.session_state["processpdf"] == Fal
 
     pdf_name = pdf_path.replace(" ","")
     cleaned = ''.join(filter(str.isalnum, pdf_path))[7:17]
+    chroma_client = st.session_state["chroma_client"]
     collection = chroma_client.get_or_create_collection(name=cleaned)
+    st.session_state["collection"] = collection
     store_embeddings(collection, chunks, embeddings, cleaned)
 
     toc = time.time()
@@ -104,7 +109,7 @@ with left_col:
                 st.write(prompt)
             with st.chat_message("assistant"):
                 with st.spinner("Thinking of a response..."):
-                    response = generate_response(prompt,collection, client)
+                    response = generate_response(prompt, st.session_state["collection"], st.session_state["openai_client"])
                     
                     def stream_response():
                         for word in response.split(" "):
