@@ -1,17 +1,10 @@
-from concurrent.futures import ThreadPoolExecutor
-import json
 import time
-from openai import OpenAI
-import pymupdf4llm
 import streamlit as st
-import language_tool_python
-import re
-from src.find_arguments import	generate_arguments
-from src.process_pdf import extract_text_from_pdf
-from src.text_corrections import get_corrections, highlight_text
-import chromadb
+from src.text_corrections import highlight_text
 from src.generate_response import generate_response
-from src.process_pdf import create_embeddings, extract_text_from_pdf, split_text, store_embeddings
+
+tic_overall = time.time()
+print(f"Starting the app... It's now {time.localtime(time.time()).tm_hour}:{time.localtime(time.time()).tm_min}:{time.localtime(time.time()).tm_sec}")
 
 st.set_page_config(
     page_title="Scientific Writing: Feedback Tool", 
@@ -19,37 +12,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
     layout="wide")
 
-tic_overall = time.time()
-
 with open( "src/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "Arguments"
 
-if "text" not in st.session_state:
-    tic = time.time()
-    pdf_path = st.session_state.get("pdf_path", None)
-    pdf_path = pdf_path.split('uploads\\', 1)[-1]
-    new_pdf_path = f"files/{pdf_path}"
-    text = pymupdf4llm.to_markdown(new_pdf_path)
-    text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
-    text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
-    st.session_state["text"] = text
-    toc = time.time()
-    print(f"Text extraction took {toc - tic:.2f} seconds")
-
 if "corrections" not in st.session_state:
     tic = time.time()
-    if "language_tool" not in st.session_state:
-        st.session_state["language_tool"] = language_tool_python.LanguageTool('en-US')
-    tool = st.session_state["language_tool"]
-    st.session_state["corrections"] = get_corrections(tool, st.session_state["text"])
+    from src.text_corrections import get_corrections
+    st.session_state["corrections"] = get_corrections()
     toc = time.time()
-    print(f"Text correction took {toc - tic:.2f} seconds")
+    print(f"Text correction took {toc - tic:.2f} seconds") # 11.27 seconds --> 17.45 seconds
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
+    
+    from openai import OpenAI
+    import chromadb
+
     openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     st.session_state["openai_client"] = openai_client
     chroma_client = chromadb.PersistentClient()
@@ -60,20 +41,22 @@ if "messages" not in st.session_state:
 
 if "arguments" not in st.session_state:
     tic = time.time()
+    from src.find_arguments import	generate_arguments
     arguments = generate_arguments(False, st.session_state["openai_client"])
     st.session_state["arguments"] = eval(arguments)
     toc = time.time()
-    print(f"Argument generation took {toc - tic:.2f} seconds")
+    print(f"Argument generation took {toc - tic:.2f} seconds") # 11.20 seconds
 
 if "processpdf" not in st.session_state or st.session_state["processpdf"] == False:
     tic = time.time()
     pdf_path = st.session_state.get("pdf_path", None)
-    pdf_text = extract_text_from_pdf(pdf_path)
+    
+    from src.process_pdf import create_embeddings, split_text, store_embeddings
+
+    pdf_text = st.session_state["text"]
     chunks = split_text(pdf_text)
 
-    with ThreadPoolExecutor() as executor:
-        embeddings_future = executor.submit(create_embeddings, chunks)
-        embeddings = embeddings_future.result()
+    embeddings = create_embeddings(chunks)
 
     st.session_state["processpdf"] = True
 
@@ -85,7 +68,7 @@ if "processpdf" not in st.session_state or st.session_state["processpdf"] == Fal
     store_embeddings(collection, chunks, embeddings, cleaned)
 
     toc = time.time()
-    print(f"PDF processing + saving embeddings took {toc - tic:.2f} seconds")
+    print(f"PDF processing + saving embeddings took {toc - tic:.2f} seconds") # 3.12 seconds
 
 st.title("Scientific Writing Feedback Tool")
 
