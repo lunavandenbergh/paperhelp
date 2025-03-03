@@ -1,4 +1,13 @@
-def get_corrections(tool, text):
+import language_tool_python
+import streamlit as st
+import time
+
+def get_corrections():
+    tic = time.time()
+    tool = language_tool_python.LanguageTool('en-US')
+    toc	= time.time()
+    print(f"Initializing the tool took {toc - tic:.2f} seconds")
+    text = st.session_state["text"]
     matches = tool.check(text)
     corrections = []
     

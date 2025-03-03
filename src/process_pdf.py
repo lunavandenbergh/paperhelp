@@ -3,11 +3,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer	
 import pymupdf
 
-# Extract text from pdf
-def extract_text_from_pdf(pdf_path):
-    doc = pymupdf.open(pdf_path)
-    return "\n".join([page.get_text() for page in doc])
-
 # Split the PDF into chunks so we don't hit the token size limit during information retrieval
 def split_text(text):
     text_splitter = RecursiveCharacterTextSplitter(
