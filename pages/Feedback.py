@@ -1,6 +1,7 @@
 import html
 import time
 import streamlit as st
+from src.display_text import display_feedback, display_text
 from src.text_corrections import highlight_text
 from src.generate_response import generate_response
 
@@ -13,13 +14,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
     layout="wide")
 
-with open( "src/style.css" ) as css:
+with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 if "feedback_type" not in st.session_state:
-    st.session_state["feedback_type"] = "Arguments"
+    st.session_state["feedback_type"] = "General"
 
-if "corrections" not in st.session_state:
+if "corrections" not in st.session_state or not isinstance(st.session_state["corrections"], list):
     tic = time.time()
     from src.text_corrections import get_corrections
     st.session_state["corrections"] = get_corrections()
@@ -40,7 +41,7 @@ if "openai_model" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or anything else."}]
 
-if "arguments" not in st.session_state:
+if "arguments" not in st.session_state or not isinstance(st.session_state["arguments"], dict):
     tic = time.time()
     from src.find_arguments import	generate_arguments
     arguments = generate_arguments()
@@ -71,15 +72,17 @@ if "processpdf" not in st.session_state or st.session_state["processpdf"] == Fal
     toc = time.time()
     print(f"PDF processing + saving embeddings took {toc - tic:.2f} seconds")
 
+if "ignored_corrections" not in st.session_state:
+    st.session_state["ignored_corrections"] = []
+
 st.title("Scientific Writing Feedback Tool")
 
 left_col, right_col = st.columns(spec=[2,1],border=True)
+
 with left_col:
     text_container = st.container(height=400)
     with text_container:
-        corrections = st.session_state["corrections"]
-        highlighted_text = highlight_text(st.session_state["text"], corrections)
-        st.markdown(highlighted_text, unsafe_allow_html=True)
+        display_text()
     
     chat = st.container(height=300)
     with chat:
@@ -94,46 +97,37 @@ with left_col:
             with st.chat_message("assistant"):
                 with st.spinner("Thinking of a response..."):
                     response = generate_response(prompt, st.session_state["collection"], st.session_state["openai_client"])
-                    
+          
                     def stream_response():
                         for word in response.split(" "):
                             yield word + " "
-                            time.sleep(0.03)         
+                            time.sleep(0.03)
+
                 st.write_stream(stream_response())
             st.session_state.messages.append({"role": "assistant", "content": response})
     
 with right_col:
     st.header("Feedback")
-    tab1, tab2, tab3 = st.tabs(["Arguments","Corrections","Style suggestions"])
-    corrections = st.session_state["corrections"]
-    feedback_type = st.session_state["feedback_type"]
-    with tab1:
-        arguments = st.session_state["arguments"]
-        for argument in arguments["arguments"]:
-            st.write(f"**{argument['context']}**")
-            st.markdown(f"- **Claim**: {argument['parts']['claim']}")
-            st.markdown(f"- **Evidence**: {argument['parts']['evidence']}")
-            st.markdown(f"- **Counterargument**: {argument['parts']['counterargument']}")
-            st.markdown(f"- **Feedback**: {argument['feedback']}")
-            st.markdown(f"- **Actionable feedback**: {argument['actionable_feedback']}")
-            st.divider()
-    with tab2:
-        for correction in corrections:
-            start = correction["offset"]
-            end = start + correction["length"]
-            error_word = st.session_state["text"][start:end]
-            suggestion = ", ".join(correction["suggestion"])
-            if correction["type"] == "misspelling":
-                st.markdown(f"<span style='border: 3px solid pink;' title='{html.escape(suggestion)}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
-            elif correction["type"] == "grammar":
-                st.markdown(f"<span style='border: 3px solid lightblue;' title='{html.escape(suggestion)}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
-    with tab3:
-        for correction in corrections:
-            start = correction["offset"]
-            end = start + correction["length"]
-            error_word = st.session_state["text"][start:end]
-            if correction["type"] == "style":
-                st.markdown(f"<span style='border: 3px solid lightgreen;'>{error_word}</span> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)
+
+    col_but1, col_but2, col_but3, col_but4 = st.columns([1,1,1,1], vertical_alignment="center")
+    with col_but1:
+        if st.button("General", key="general", type="primary"):
+            st.session_state["feedback_type"] = "General"
+            st.rerun()
+    with col_but2:
+        if st.button("Arguments", key="args", type="primary"):
+            st.session_state["feedback_type"] = "Arguments"
+            st.rerun()
+    with col_but3:
+        if st.button("Corrections", key="correct", type="primary"):
+            st.session_state["feedback_type"] = "Corrections"
+            st.rerun()
+    with col_but4:
+        if st.button("Style", key="style", type="primary"):
+            st.session_state["feedback_type"] = "Style"
+            st.rerun()
+
+    display_feedback()
 
 toc_overall = time.time()
 print(f"Overall execution time: {toc_overall - tic_overall:.2f} seconds")

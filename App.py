@@ -6,7 +6,7 @@ import time
 st.set_page_config(page_title="Upload your PDF!", 
                    page_icon="📄")
 
-with open( "src/style.css" ) as css:
+with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
     
 st.title("Welcome!")

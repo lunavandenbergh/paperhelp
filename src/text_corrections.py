@@ -38,6 +38,13 @@ def highlight_text(text, corrections):
                 f'<span style="border: 3px solid powderblue;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
             )
+        elif correction["type"] == "argument":
+            
+            highlighted_text = (
+                highlighted_text[:start] +
+                f'<span style="border: 3px solid powderblue;" title="{suggestion}">{error_text}</span>' +
+                highlighted_text[end:]
+            )
         else:
             highlighted_text = (
                 highlighted_text[:start] +
