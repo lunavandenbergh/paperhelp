@@ -1,8 +1,6 @@
-import html
 import time
 import streamlit as st
 from src.display_text import display_feedback, display_text
-from src.text_corrections import highlight_text
 from src.generate_response import generate_response
 
 tic_overall = time.time()
@@ -80,7 +78,7 @@ st.title("Scientific Writing Feedback Tool")
 left_col, right_col = st.columns(spec=[2,1],border=True)
 
 with left_col:
-    text_container = st.container(height=400)
+    text_container = st.container(height=500)
     with text_container:
         display_text()
     

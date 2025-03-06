@@ -9,8 +9,16 @@ st.set_page_config(page_title="Upload your PDF!",
 with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
     
-st.title("Welcome!")
-st.write("Upload a PDF to process it.")
+st.title("Upload Your Paper for AI-Powered Feedback")
+st.write("Welcome! This tool provides AI-driven feedback on your scientific paper or draft, helping you refine your writing with insights on:")
+st.write("✅ Clarity & Structure – Enhance coherence and organization.")
+st.write("✅ Grammar & Style – Improve clarity, readability, and academic tone.")
+st.write("✅ Argument Strength – Receive structured feedback on arguments.")
+st.write("✅ Actionable Suggestions – Get specific, practical recommendations for improvement.")
+
+st.write("🔹 Upload your PDF file below to begin. Your document will be processed, and you'll receive interactive feedback in just a few moments.")
+
+st.write("💡 Need help? You can chat with the AI assistant at any time for clarification or further research suggestions.")
 
 def initialize_app():
     for filename in os.listdir("uploads"):
