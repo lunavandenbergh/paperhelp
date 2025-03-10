@@ -19,7 +19,7 @@ def find_relevant_chunks(question, collection, top_k=3):
 def generate_response(prompt, collection, client):
     relevant_chunks = find_relevant_chunks(prompt, collection)
     context = "\n\n".join(relevant_chunks)
-    system_message = f"Use the following document excerpts to answer the question:\n\n{context}\n\nQuestion: {prompt}"
+    system_message = f"Use the following document excerpts to answer the question:\n\n{context}\n\nQuestion: {prompt}."
 
     stream = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -27,7 +27,6 @@ def generate_response(prompt, collection, client):
                 {"role": "system", "content": system_message},
                 *st.session_state.messages,
             ],
-            stream=True,
             )
     response = stream.choices[0].message.content
     return response

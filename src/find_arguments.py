@@ -11,7 +11,7 @@ def generate_arguments():
                          Please do not respond with anything other than the JSON format.
                          Your response has to be processed as a string that directly becomes a JSON object.
                          Each argument should be treated as a standalone unit and should include the following details:
-                         - context: The full argument
+                         - context: The full argument. Please keep any mistakes or errors in the text as they are.
                          - parts: Breakdown of the argument into:
                              - claim: The main assertion or statement being argued.
                              - evidence: Factual or logical support for the claim.

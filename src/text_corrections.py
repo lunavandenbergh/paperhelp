@@ -29,13 +29,20 @@ def highlight_text(text, corrections):
         if correction["type"] == "misspelling":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="border: 3px solid pink;" title="{suggestion}">{error_text}</span>' +
+                f'<span style="border: 3px solid red;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
             )
         elif correction["type"] == "grammar":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="border: 3px solid powderblue;" title="{suggestion}">{error_text}</span>' +
+                f'<span style="border: 3px solid blue;" title="{suggestion}">{error_text}</span>' +
+                highlighted_text[end:]
+            )
+        elif correction["type"] == "argument":
+            
+            highlighted_text = (
+                highlighted_text[:start] +
+                f'<span style="border: 3px solid orange;" title="{suggestion}">{error_text}</span>' +
                 highlighted_text[end:]
             )
         else:
