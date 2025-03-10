@@ -43,6 +43,6 @@ if uploaded_file is not None:
     st.session_state["text"] = text
     st.session_state["pdf_path"] = uploaded_file.name  
 
-    print(f"Going to the next page... It's now {time.localtime(time.time()).tm_hour}:{time.localtime(time.time()).tm_min}:{time.localtime(time.time()).tm_sec}")
+    print(f"Going to the next page... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
     st.switch_page("pages/Feedback.py")
     

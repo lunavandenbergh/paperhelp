@@ -1,10 +1,11 @@
+import html
 import time
 import streamlit as st
 from src.text_corrections import highlight_text
 from src.generate_response import generate_response
 
 tic_overall = time.time()
-print(f"Starting the app... It's now {time.localtime(time.time()).tm_hour}:{time.localtime(time.time()).tm_min}:{time.localtime(time.time()).tm_sec}")
+print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
 
 st.set_page_config(
     page_title="Scientific Writing: Feedback Tool", 
@@ -23,7 +24,7 @@ if "corrections" not in st.session_state:
     from src.text_corrections import get_corrections
     st.session_state["corrections"] = get_corrections()
     toc = time.time()
-    print(f"Text correction took {toc - tic:.2f} seconds") # 11.27 seconds --> 17.45 seconds
+    print(f"Text correction took {toc - tic:.2f} seconds")
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
@@ -42,10 +43,10 @@ if "messages" not in st.session_state:
 if "arguments" not in st.session_state:
     tic = time.time()
     from src.find_arguments import	generate_arguments
-    arguments = generate_arguments(False, st.session_state["openai_client"])
+    arguments = generate_arguments()
     st.session_state["arguments"] = eval(arguments)
     toc = time.time()
-    print(f"Argument generation took {toc - tic:.2f} seconds") # 11.20 seconds
+    print(f"Argument generation took {toc - tic:.2f} seconds")
 
 if "processpdf" not in st.session_state or st.session_state["processpdf"] == False:
     tic = time.time()
@@ -68,7 +69,7 @@ if "processpdf" not in st.session_state or st.session_state["processpdf"] == Fal
     store_embeddings(collection, chunks, embeddings, cleaned)
 
     toc = time.time()
-    print(f"PDF processing + saving embeddings took {toc - tic:.2f} seconds") # 3.12 seconds
+    print(f"PDF processing + saving embeddings took {toc - tic:.2f} seconds")
 
 st.title("Scientific Writing Feedback Tool")
 
@@ -123,9 +124,9 @@ with right_col:
             error_word = st.session_state["text"][start:end]
             suggestion = ", ".join(correction["suggestion"])
             if correction["type"] == "misspelling":
-                st.markdown(f"<span style='border: 3px solid pink;' title='{suggestion}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
+                st.markdown(f"<span style='border: 3px solid pink;' title='{html.escape(suggestion)}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
             elif correction["type"] == "grammar":
-                st.markdown(f"<span style='border: 3px solid lightblue;' title='{suggestion}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
+                st.markdown(f"<span style='border: 3px solid lightblue;' title='{html.escape(suggestion)}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
     with tab3:
         for correction in corrections:
             start = correction["offset"]

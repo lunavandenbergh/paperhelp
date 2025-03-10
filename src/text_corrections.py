@@ -3,10 +3,8 @@ import streamlit as st
 import time
 
 def get_corrections():
-    tic = time.time()
+    #tool_public = language_tool_python.LanguageToolPublicAPI('en-US')
     tool = language_tool_python.LanguageTool('en-US')
-    toc	= time.time()
-    print(f"Initializing the tool took {toc - tic:.2f} seconds")
     text = st.session_state["text"]
     matches = tool.check(text)
     corrections = []
@@ -19,7 +17,6 @@ def get_corrections():
             "length": match.errorLength,
             "type": match.ruleIssueType
         })
-    
     return corrections
 
 def highlight_text(text, corrections):
