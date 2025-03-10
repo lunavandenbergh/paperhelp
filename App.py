@@ -8,17 +8,21 @@ st.set_page_config(page_title="Upload your PDF!",
 
 with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
-    
-st.title("Upload Your Paper for AI-Powered Feedback")
-st.write("Welcome! This tool provides AI-driven feedback on your scientific paper or draft, helping you refine your writing with insights on:")
-st.write("✅ Clarity & Structure – Enhance coherence and organization.")
-st.write("✅ Grammar & Style – Improve clarity, readability, and academic tone.")
-st.write("✅ Argument Strength – Receive structured feedback on arguments.")
-st.write("✅ Actionable Suggestions – Get specific, practical recommendations for improvement.")
 
-st.write("🔹 Upload your PDF file below to begin. Your document will be processed, and you'll receive interactive feedback in just a few moments.")
+explanation = st.container()
+with explanation:
+    st.title("Upload Your Paper for AI-Powered Feedback")
+    st.write("Welcome! This tool provides AI-driven feedback on your scientific paper or draft, helping you refine your writing with insights on:")
+    st.write("✅ Clarity & Structure – Enhance coherence and organization.")
+    st.write("✅ Grammar & Style – Improve clarity, readability, and academic tone.")
+    st.write("✅ Argument Strength – Receive structured feedback on arguments.")
+    st.write("✅ Actionable Suggestions – Get specific, practical recommendations for improvement.")
 
-st.write("💡 Need help? You can chat with the AI assistant at any time for clarification or further research suggestions.")
+    st.write("🔹 Upload your PDF file below to begin. Your document will be processed, and you'll receive interactive feedback in just a few moments.")
+
+    st.write("💡 Need help? You can chat with the AI assistant at any time for clarification or further research suggestions.")
+
+    uploaded_file = st.file_uploader("Upload your paper in PDF format here:", type="pdf")
 
 def initialize_app():
     for filename in os.listdir("uploads"):
@@ -34,8 +38,6 @@ def initialize_app():
 if "files_initialized" not in st.session_state:
     initialize_app()                        
     st.session_state["files_initialized"] = True
-
-uploaded_file = st.file_uploader("Upload your PDF here", type="pdf")
 
 if uploaded_file is not None:
     save_path = os.path.join("uploads", uploaded_file.name)
