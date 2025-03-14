@@ -61,7 +61,7 @@
 	background-color: #d3dbd0;
 	border: 1px	solid #b3bfae;
 	color: #333831;
-	font-size: 12px;
+	font-size: 15px;
 	width: 100%;
 	text-align: center;
 }
@@ -72,7 +72,7 @@
 .st-key-general	button:hover {
 	background-color: #f1f5f0;
 	border: 1px	solid #c4d1c0;
-	font-size: 12px;
+	font-size: 15px;
 }
 
 .st-emotion-cache-knbk0m, /*	Right column */

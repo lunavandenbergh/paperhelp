@@ -39,12 +39,12 @@ def display_feedback():
                 suggestion = ", ".join(correction["suggestion"])
                 if correction["type"] == "misspelling":
                     col1, col2 = st.columns([4, 1], vertical_alignment="center")
-                    col1.markdown(f"<span style='border: 3px solid pink;' title='{html.escape(suggestion)}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
+                    col1.markdown(f"<span style='border: 3px solid red;' title='{html.escape(suggestion)}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
                     if col2.button("X", key=f"ignore_{start}_{end}",type="tertiary"):
                         ignore_correction(start, end)
                         st.rerun()
                 elif correction["type"] == "grammar":
-                    st.markdown(f"<span style='border: 3px solid lightblue;' title='{html.escape(suggestion)}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
+                    st.markdown(f"<span style='border: 3px solid blue;' title='{html.escape(suggestion)}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
     
     if feedback_type == "Style":
         corrections = st.session_state["corrections"]
@@ -53,7 +53,7 @@ def display_feedback():
             end = start + correction["length"]
             error_word = st.session_state["text"][start:end]
             if correction["type"] == "style":
-                st.markdown(f"<span style='border: 3px solid lightgreen;'>{error_word}</span> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)
+                st.markdown(f"<span style='border: 3px solid green;'>{error_word}</span> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)
 
 
 def display_text():

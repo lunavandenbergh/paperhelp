@@ -66,11 +66,9 @@ if "processpdf" not in st.session_state or st.session_state["processpdf"] == Fal
 
     pdf_name = pdf_path.replace(" ","")
     pdf_name	= pdf_name.replace("/","")
-    print(pdf_name)
     cleaned = ''.join(filter(str.isalnum, pdf_path))[1:17]
-    print(cleaned)
     chroma_client = st.session_state["chroma_client"]
-    collection = chroma_client.get_or_create_collection(name=cleaned)
+    collection = chroma_client.get_or_create_collection(name="paper")
     st.session_state["collection"] = collection
     store_embeddings(collection, chunks, embeddings, cleaned)
 
@@ -115,7 +113,7 @@ with left_col:
 with right_col:
     st.header("Feedback")
 
-    col_but1, col_but2, col_but3, col_but4 = st.columns([1,1,1,1], vertical_alignment="center")
+    col_but1, col_but2, col_but3 = st.columns([1,1,1], vertical_alignment="center")
     with col_but1:
         if st.button("General", key="general", type="secondary"):
             st.session_state["feedback_type"] = "General"
@@ -127,10 +125,6 @@ with right_col:
     with col_but3:
         if st.button("Corrections", key="correct", type="secondary"):
             st.session_state["feedback_type"] = "Corrections"
-            st.rerun()
-    with col_but4:
-        if st.button("Style", key="style", type="secondary"):
-            st.session_state["feedback_type"] = "Style"
             st.rerun()
 
     display_feedback()
