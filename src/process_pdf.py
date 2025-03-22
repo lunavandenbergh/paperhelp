@@ -1,7 +1,5 @@
-from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer	
-import pymupdf
 
 # Split the PDF into chunks so we don't hit the token size limit during information retrieval
 def split_text(text):

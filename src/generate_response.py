@@ -19,16 +19,41 @@ def find_relevant_chunks(question, collection, top_k=3):
 def generate_response(prompt, collection, client):
     relevant_chunks = find_relevant_chunks(prompt, collection)
     context = "\n\n".join(relevant_chunks)
-    system_message = f"Use the following document excerpts to answer the question:\n\n{context}\n\nQuestion: {prompt}."
+    system_message = f"Use the following document excerpts if the paper draft is necesssary to answer the question :\n\n{context}\n\nDon't use the context if the user asks something that's not related to their paper. Question: {prompt}."
 
+    messages = [
+    {
+        "role": "system",
+        "content": (
+            '''You are an academic assistant that provides feedback on research papers. 
+               The user has uploaded a draft, which is stored in your knowledge base.
+
+               You also can be asked to generate new text or provide scientific papers on a certain topic. 
+                       
+               ⚠️ Always search your knowledge base before answering questions. 
+               If relevant information exists, include it in your response. 
+               If no relevant data is found, politely ask the user for clarification.
+                       
+               Always cite your sources.'''
+        ),
+    },
+    {   
+        "role": "user",
+        "content": (
+            f"{system_message}"
+        ),
+    },
+]
+
+    # Call the OpenAI API
     stream = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_message},
-                *st.session_state.messages,
-            ],
-            )
+        model="sonar",
+        messages=messages,
+    )
+    print(stream)
     response = stream.choices[0].message.content
-    return response
-
-
+    citations = stream.citations
+    return {
+        "response": response,
+        "citations": citations,
+    }

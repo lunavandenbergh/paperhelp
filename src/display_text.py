@@ -12,10 +12,10 @@ def display_feedback():
     feedback_type = st.session_state["feedback_type"]
 
     if feedback_type == "General":
-        st.write("General feedback")
+        st.write(st.session_state["general_feedback"])
 
     if feedback_type == "Arguments":
-        arguments_container = st.container(height=600, border=False)
+        arguments_container = st.container(height=750, border=False)
         arguments = st.session_state["arguments"]
         for argument in arguments["arguments"]:
             arguments_container.write(f"**{argument['context']}**")
@@ -28,7 +28,7 @@ def display_feedback():
 
     if feedback_type == "Corrections":
         corrections = st.session_state["corrections"]
-        corrections_container = st.container(height=600, border=False)
+        corrections_container = st.container(height=750, border=False)
         with corrections_container:
             for correction in corrections:
                 start = correction["offset"]

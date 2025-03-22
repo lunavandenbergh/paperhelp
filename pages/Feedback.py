@@ -1,7 +1,6 @@
 import time
+from openai import OpenAI
 import streamlit as st
-from src.display_text import display_feedback, display_text
-from src.generate_response import generate_response
 
 tic_overall = time.time()
 print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
@@ -16,8 +15,9 @@ st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_all
 
 st.title("Scientific Writing Feedback Tool")
 
-with open( "./assets/style.css" ) as css:
-    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+from src.generate_response import generate_response
+from src.display_text import display_feedback, display_text
+import chromadb
 
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
@@ -31,14 +31,19 @@ if "corrections" not in st.session_state or not isinstance(st.session_state["cor
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
-    
-    from openai import OpenAI
-    import chromadb
-
     openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     st.session_state["openai_client"] = openai_client
     chroma_client = chromadb.PersistentClient()
     st.session_state["chroma_client"] = chroma_client
+
+if "agent" not in st.session_state:
+    tic = time.time()
+    pdf_path = st.session_state["pdf_path"]
+    client = OpenAI(api_key=st.secrets["PERPLEXITY_API_KEY"], 
+                    base_url="https://api.perplexity.ai")
+    st.session_state["agent"] = client
+    toc = time.time()
+    print(f"Initializing assistant took {toc - tic:.2f} seconds")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or anything else."}]
@@ -47,7 +52,6 @@ if "arguments" not in st.session_state or not isinstance(st.session_state["argum
     tic = time.time()
     from src.find_arguments import	generate_arguments
     arguments = generate_arguments()
-    st.session_state["arguments"] = eval(arguments)
     toc = time.time()
     print(f"Argument generation took {toc - tic:.2f} seconds")
 
@@ -83,7 +87,7 @@ left_col, right_col = st.columns(spec=[7,4],border=True)
 with left_col:
     text_container = st.container(height=500,border=False)
     with text_container:
-        st.header("Your Paper")
+        st.subheader("Your Paper")
         display_text()
     
     chat_container = st.container(height=400)
@@ -100,18 +104,18 @@ with left_col:
                     st.write(prompt)
                 with st.chat_message("assistant"):
                     with st.spinner("Thinking of a response..."):
-                        response = generate_response(prompt, st.session_state["collection"], st.session_state["openai_client"])
-          
-                        def stream_response():
-                            for word in response.split(" "):
-                                yield word + " "
-                                time.sleep(0.03)
-
-                    st.write_stream(stream_response())
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                        assistant = st.session_state["agent"]
+                        output = generate_response(prompt, st.session_state["collection"], st.session_state["agent"])
+                        st.write(output["response"])
+                        with st.expander("See citations"): #of popover
+                            i = 0
+                            for citation in output["citations"]:
+                                st.write(f"[{i}] {citation}")
+                                i += 1
+                st.session_state.messages.append({"role": "assistant", "content": output["response"]})
     
 with right_col:
-    st.header("Feedback")
+    st.subheader("Feedback")
 
     col_but1, col_but2, col_but3 = st.columns([1,1,1], vertical_alignment="center")
     with col_but1:
