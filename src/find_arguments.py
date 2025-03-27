@@ -5,6 +5,7 @@ import json
 def split_text(text, max_length=2000):
     return [text[i:i + max_length] for i in range(0, len(text), max_length)]
 
+# TODO think about how to handle counterarguments
 def generate_arguments():
     import google.genai
     try:

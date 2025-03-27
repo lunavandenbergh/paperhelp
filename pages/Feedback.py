@@ -16,7 +16,7 @@ st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_all
 st.title("Scientific Writing Feedback Tool")
 
 from src.generate_response import generate_response
-from src.display_text import display_feedback, display_text
+from src.display_text import display_citations, display_feedback, display_message, display_text
 import chromadb
 
 if "feedback_type" not in st.session_state:
@@ -46,7 +46,7 @@ if "agent" not in st.session_state:
     print(f"Initializing assistant took {toc - tic:.2f} seconds")
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or anything else."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or anything else.", "citations": None}]
 
 if "arguments" not in st.session_state or not isinstance(st.session_state["arguments"], dict):
     tic = time.time()
@@ -85,9 +85,10 @@ if "ignored_corrections" not in st.session_state:
 left_col, right_col = st.columns(spec=[7,4],border=True)
 
 with left_col:
-    text_container = st.container(height=500,border=False)
+    st.subheader("Your Paper")
+    # TODO maybe toggle between text and chat
+    text_container = st.container(height=500,border=True)
     with text_container:
-        st.subheader("Your Paper")
         display_text()
     
     chat_container = st.container(height=400)
@@ -96,7 +97,9 @@ with left_col:
         with chat:
             for message in st.session_state.messages:
                 with st.chat_message(message["role"]):
-                    st.write(message["content"])
+                    st.write(message["content"], unsafe_allow_html=True) 
+                    if message["role"] == "assistant" and message["citations"] is not None:
+                        display_citations(message["citations"])
         if prompt := st.chat_input("Ask me about your pdf!"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with chat:
@@ -106,13 +109,13 @@ with left_col:
                     with st.spinner("Thinking of a response..."):
                         assistant = st.session_state["agent"]
                         output = generate_response(prompt, st.session_state["collection"], st.session_state["agent"])
-                        st.write(output["response"])
-                        with st.expander("See citations"): #of popover
-                            i = 0
-                            for citation in output["citations"]:
-                                st.write(f"[{i}] {citation}")
-                                i += 1
-                st.session_state.messages.append({"role": "assistant", "content": output["response"]})
+                        #output = {
+                        #    "response": "Example response [1]. Another sentence [3].",
+                        #    "citations": ["Author1 et al. (2022). Paper title. Journal, 1(1), 1-10.", "Author2 et al. (2022). Another paper title. Journal, 1(1), 1-10.", "Author3 et al. (2022). Yet another paper title. Journal, 1(1), 1-10."]
+                        #}
+                        message = display_message(output["response"],output["citations"])
+                        
+                st.session_state.messages.append({"role": "assistant", "content": message, "citations": output["citations"]})
     
 with right_col:
     st.subheader("Feedback")

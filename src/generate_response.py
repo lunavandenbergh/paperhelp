@@ -34,7 +34,7 @@ def generate_response(prompt, collection, client):
                If relevant information exists, include it in your response. 
                If no relevant data is found, politely ask the user for clarification.
                        
-               Always cite your sources.'''
+               Always cite your sources. Preferably, these sources are scientific papers or books.'''
         ),
     },
     {   

@@ -1,8 +1,7 @@
 import html
 import streamlit	as st
-
+import re
 from src.text_corrections import highlight_text
-
 
 def ignore_correction(start, end):
     st.session_state["ignored_corrections"].append((start, end))
@@ -18,7 +17,7 @@ def display_feedback():
         arguments_container = st.container(height=750, border=False)
         arguments = st.session_state["arguments"]
         for argument in arguments["arguments"]:
-            arguments_container.write(f"**{argument['context']}**")
+            arguments_container.write(f"Argument: **{argument['context']}**")
             arguments_container.markdown(f"- **Claim**: {argument['parts']['claim']}")
             arguments_container.markdown(f"- **Evidence**: {argument['parts']['evidence']}")
             arguments_container.markdown(f"- **Counterargument**: {argument['parts']['counterargument']}")
@@ -33,16 +32,11 @@ def display_feedback():
             for correction in corrections:
                 start = correction["offset"]
                 end = start + correction["length"]
-                if (start, end) in st.session_state["ignored_corrections"]:
-                    continue
                 error_word = st.session_state["text"][start:end]
                 suggestion = ", ".join(correction["suggestion"])
                 if correction["type"] == "misspelling":
                     col1, col2 = st.columns([4, 1], vertical_alignment="center")
                     col1.markdown(f"<span style='border: 3px solid red;' title='{html.escape(suggestion)}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
-                    if col2.button("X", key=f"ignore_{start}_{end}",type="tertiary"):
-                        ignore_correction(start, end)
-                        st.rerun()
                 elif correction["type"] == "grammar":
                     st.markdown(f"<span style='border: 3px solid blue;' title='{html.escape(suggestion)}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
     
@@ -87,3 +81,26 @@ def display_text():
         st.markdown(highlighted_text, unsafe_allow_html=True)
     else:
         st.markdown(st.session_state["text"], unsafe_allow_html=True)
+        
+def display_message(text,citations):
+    updated_text = text
+    if bool(re.search(r"\[\d+\]", text)):
+        citations_in_text = re.findall(r"\[\d+\]", text)
+        for citation in citations_in_text:
+            number = citation[1]
+            citation_from_list = citations[int(number)-1]
+            updated_text = updated_text.replace(citation, 
+            # TODO link ipv span title
+                f"<span title='{citation_from_list}' style='border-bottom: 1px dashed blue;'>{citation}</span>")
+        st.write(updated_text, unsafe_allow_html=True)
+    else:
+        st.write(text)
+    display_citations(citations)
+    return updated_text
+    
+def display_citations(citations):
+    with st.expander("See citations"): #of popover
+        i = 1
+        for citation in citations:
+            st.write(f"[{i}] {citation}")
+            i += 1
