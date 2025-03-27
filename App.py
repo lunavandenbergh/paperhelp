@@ -48,8 +48,11 @@ if uploaded_file is not None:
     import pymupdf4llm
 
     text = pymupdf4llm.to_markdown(save_path)
+    
+    text = re.sub(r'\$', r'\\$', text)
     text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
     text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
+    
     st.session_state["text"] = text
     st.session_state["pdf_path"] = uploaded_file.name  
 

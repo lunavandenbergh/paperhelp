@@ -25,7 +25,8 @@ if "feedback_type" not in st.session_state:
 if "corrections" not in st.session_state or not isinstance(st.session_state["corrections"], list):
     tic = time.time()
     from src.text_corrections import get_corrections
-    st.session_state["corrections"] = get_corrections()
+    #st.session_state["corrections"] = get_corrections()
+    st.session_state["corrections"] = []
     toc = time.time()
     print(f"Text correction took {toc - tic:.2f} seconds")
 
