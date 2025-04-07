@@ -1,28 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Poppins&family=Raleway:wght@600&display=swap');
 
-/* App */
-
-.st-emotion-cache-1n76uvr.e6rk8up3 {
-	background-color: white;
-	border: 15px	solid white;
-	border-radius: 16px;
-	color: #393939;
-}
 
 html, body, [class*="css"] { /* Title of user text */
 	font-size: 12px;
+	font-family: "Poppins", sans-serif;
 }
 
 .stSidebar {
 	font-family: "Poppins", sans-serif;
-}
-
-/*	Feedback */
-
-.st-emotion-cache-1hyd1ho.egexzqm0 { /* Buttons */
-	font-family: "Poppins", sans-serif;
-	font-size: 15px;
-	color: #393939;
 }
 
 #scientific-writing-feedback-tool {
@@ -32,8 +17,6 @@ html, body, [class*="css"] { /* Title of user text */
 	text-align: center;
 	margin-bottom: 20px;
 	color: #393939;
-	background-color: #f1f1f1;
-	/*border: 2px	solid #888888;*/
 	border-radius: 9px;
 }
 
@@ -56,21 +39,17 @@ html, body, [class*="css"] { /* Title of user text */
 	color: #393939;
 }
 
-.st-emotion-cache-1104ytp { /*	Text in feedback sections*/
-	font-family: "Poppins", sans-serif;
-	font-size: 15px;
-}
-
 .st-key-correct button,
 .st-key-args button,
 .st-key-style button,
 .st-key-general button {
-	background-color: #e0e0e0;
+	background-color: #ececec;
 	border: 1px	solid #c1c1c1;
 	color: #393939;
 	font-size: 15px;
 	width: 100%;
 	text-align: center;
+	font-family: "Poppins", sans-serif;
 }
 
 .st-key-correct	button:hover,
@@ -82,15 +61,130 @@ html, body, [class*="css"] { /* Title of user text */
 	font-size: 15px;
 }
 
-.st-emotion-cache-knbk0m, /*	Right column */
-.st-emotion-cache-92rggi { /*	Left column */
- background-color: #f2f2f2;
-	border: 2px	solid #f2f2f2;
+.item-general {
+	border-left: grey 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+ align-items: center;
 }
 
-/* Target left column but NOT chat messages */
-.st-emotion-cache-1vc6er *:not(.stChatMessage):not(.stChatMessage *) {
-	font-family: "Poppins", sans-serif !important;
-	font-size: 16px;
-	color: #333; /* Dark gray for readability */
+.item-spelling {
+	border-left: red 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+ align-items: center;
 }
+
+.item-grammar {
+	border-left: blue 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+ align-items: center;
+}
+
+.item-style {
+	border-left: green 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+ align-items: center;
+}
+
+.item-argumentation {
+	border-left: orange 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 20px;
+ justify-content: space-between;
+ align-items: center;
+}
+
+.arg-part {
+	background-color: white;
+	background-color: #f8f8f8;
+	padding: 10px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+ align-items: center;
+}
+
+.expandable-text {
+	display: inline-block;
+	max-width: 445px; /* Limit the width of the text */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	transition: max-width 0.3s ease; /* Smooth transition */
+	cursor: pointer;
+}
+
+.expandable-text:hover {
+	max-width: 100%; /* Expand to full width on hover */
+	white-space: normal; /* Allow wrapping of text */
+	overflow: visible; /* Show the full text */
+}
+
+.explanation {
+	background-color: #f1f1f1;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	margin-bottom: 10px;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 15px;
+}
+
+#front-title {
+	font-family: "Poppins", sans-serif;
+	font-size: 50px;
+	font-weight: 700;
+	text-align: center;
+	margin-bottom: 20px;
+	color: #393939;
+}
+
+.st-key-file_uploader_text {
+ font-size: 15px;
+}
+
+.st-key-chat_container {
+	color: red;
+}
+
+.st-key-text_container {
+	border-radius: 30px;
+	font-size: 15px !important;
+}
+
+.st-key-arguments_container {
+	color: rgb(8, 8, 8);
+}
+
+div[data-testid="stColumn"] {
+	background-color: #f8f8f8;
+	border: #f8f8f8 2px solid;
+}
+
+#joe 
+{
+	background-color: pink;}

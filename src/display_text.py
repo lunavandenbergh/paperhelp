@@ -11,34 +11,39 @@ def display_feedback():
     feedback_type = st.session_state["feedback_type"]
 
     if feedback_type == "General":
-        st.write(st.session_state["general_feedback"])
+        st.write(f"<div class='item-general'>{st.session_state['general_feedback']}</div>", unsafe_allow_html=True)
 
     if feedback_type == "Arguments":
-        arguments_container = st.container(height=750, border=False)
+        arguments_container = st.container(height=868, border=False, key="arguments_container")
         arguments = st.session_state["arguments"]
         for argument in arguments["arguments"]:
-            arguments_container.write(f"Argument: **{argument['context']}**")
-            arguments_container.markdown(f"- **Claim**: {argument['parts']['claim']}")
-            arguments_container.markdown(f"- **Evidence**: {argument['parts']['evidence']}")
-            arguments_container.markdown(f"- **Counterargument**: {argument['parts']['counterargument']}")
-            arguments_container.markdown(f"- **Feedback**: {argument['feedback']}")
-            arguments_container.markdown(f"- **Actionable feedback**: {argument['actionable_feedback']}")
-            arguments_container.divider()
+            long_argument = argument['context']
+            arguments_container.write(
+                f"""
+																<div class='item-argumentation'>
+																    <div class='expandable-text'>Full argument: <b>{long_argument}</b></div>
+																				<div class='arg-part'><i>Claim:</i> {argument['parts']['claim']}<br><br>
+																				<i>Evidence:</i> {argument['parts']['evidence']}</div> 
+																				<div class='arg-part'><i>Counterargument:</i> {argument['parts']['counterargument']}</div> 
+																				<div class='arg-part'><i>Feedback:</i> {argument['feedback']}<br><br>
+																				<i>Actionable feedback:</i> {argument['actionable_feedback']}</div>
+																</div>
+																""", unsafe_allow_html=True)
 
     if feedback_type == "Corrections":
         corrections = st.session_state["corrections"]
-        corrections_container = st.container(height=750, border=False)
+        corrections_container = st.container(height=868, border=False)
         with corrections_container:
             for correction in corrections:
                 start = correction["offset"]
                 end = start + correction["length"]
                 error_word = st.session_state["text"][start:end]
-                suggestion = ", ".join(correction["suggestion"])
+                # suggestion = ", ".join(correction["suggestion"])
+                suggestion = correction["suggestion"][0] if len(correction["suggestion"]) > 0 else "No suggestion"
                 if correction["type"] == "misspelling":
-                    col1, col2 = st.columns([4, 1], vertical_alignment="center")
-                    col1.markdown(f"<span style='border: 3px solid red;' title='{html.escape(suggestion)}'>{error_word}</span> - **Spelling mistake**", unsafe_allow_html=True)
+                    st.write(f"<div class='item-spelling' title='{html.escape(suggestion)}'>{error_word} → <span style='color: red'><b>{suggestion}</b></span><br><small>Spelling mistake</small></div>",	unsafe_allow_html=True)
                 elif correction["type"] == "grammar":
-                    st.markdown(f"<span style='border: 3px solid blue;' title='{html.escape(suggestion)}'>{error_word}</span> - **Grammar mistake**", unsafe_allow_html=True)
+                    st.write(f"<div class='item-grammar' title='{html.escape(suggestion)}'>{error_word} → <span style='color: blue'><b>{suggestion}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
     
     if feedback_type == "Style":
         corrections = st.session_state["corrections"]
@@ -47,8 +52,7 @@ def display_feedback():
             end = start + correction["length"]
             error_word = st.session_state["text"][start:end]
             if correction["type"] == "style":
-                st.markdown(f"<span style='border: 3px solid green;'>{error_word}</span> **Error**: {correction['error']} **Suggestion**: {', '.join(correction['suggestion'])}", unsafe_allow_html=True)
-
+                st.write(f"<div class='item-style' title='{html.escape(suggestion)}'>{error_word} → <span style='color: blue'><b>{suggestion}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
 
 def display_text():
     
@@ -63,8 +67,9 @@ def display_text():
         for argument in arguments["arguments"]:
             all_arguments.append(argument['context'])
         corrections = []
+        normalized_text = text.replace("\n", " ")
         for arg in all_arguments:
-            start = text.find(arg)
+            start = normalized_text.find(arg)
             if start != -1:
                 corrections.append({
                     "error": arg,
@@ -73,7 +78,7 @@ def display_text():
                     "length": len(arg),
                     "type": "argument"
                 })
-        highlighted_text = highlight_text(text, corrections)
+        highlighted_text = highlight_text(st.session_state["text"], corrections)
         st.markdown(highlighted_text, unsafe_allow_html=True)
     elif feedback_type == "Corrections":
         corrections = st.session_state["corrections"]

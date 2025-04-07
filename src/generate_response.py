@@ -1,6 +1,4 @@
-from openai import OpenAI
 from sentence_transformers import SentenceTransformer
-import streamlit as st
 import time
 
 # Find the most relevant chunks of the pdf, compared to user question, in the existing embeddings

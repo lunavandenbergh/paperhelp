@@ -1,3 +1,4 @@
+import json
 import time
 from openai import OpenAI
 import streamlit as st
@@ -10,6 +11,7 @@ st.set_page_config(
     page_icon="📄",
     initial_sidebar_state="collapsed",
     layout="wide")
+
 
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
 
@@ -25,10 +27,15 @@ if "feedback_type" not in st.session_state:
 if "corrections" not in st.session_state or not isinstance(st.session_state["corrections"], list):
     tic = time.time()
     from src.text_corrections import get_corrections
-    #st.session_state["corrections"] = get_corrections()
-    st.session_state["corrections"] = []
+    st.session_state["corrections"] = get_corrections()
     toc = time.time()
     print(f"Text correction took {toc - tic:.2f} seconds")
+    tic = time.time()
+    from src.text_corrections import get_corrections_llm
+    get_corrections_llm()
+    print(st.session_state["corrections_llm"])
+    toc = time.time()
+    print(f"Text correction (llm) took {toc - tic:.2f} seconds")
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
@@ -52,7 +59,7 @@ if "messages" not in st.session_state:
 if "arguments" not in st.session_state or not isinstance(st.session_state["arguments"], dict):
     tic = time.time()
     from src.find_arguments import	generate_arguments
-    arguments = generate_arguments()
+    generate_arguments()
     toc = time.time()
     print(f"Argument generation took {toc - tic:.2f} seconds")
 
@@ -87,12 +94,11 @@ left_col, right_col = st.columns(spec=[7,4],border=True)
 
 with left_col:
     st.subheader("Your Paper")
-    # TODO maybe toggle between text and chat
-    text_container = st.container(height=500,border=True)
+    text_container = st.container(height=500,border=True, key="text_container")
     with text_container:
         display_text()
     
-    chat_container = st.container(height=400)
+    chat_container = st.container(height=400, border=True, key="chat_container")
     with chat_container:
         chat = st.container(height=310, border=False)
         with chat:
@@ -134,7 +140,7 @@ with right_col:
         if st.button("Corrections", key="correct", type="secondary"):
             st.session_state["feedback_type"] = "Corrections"
             st.rerun()
-
+            
     display_feedback()
 
 toc_overall = time.time()

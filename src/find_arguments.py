@@ -1,5 +1,4 @@
 import streamlit as st
-import asyncio
 import json
 
 def split_text(text, max_length=2000):
@@ -8,10 +7,6 @@ def split_text(text, max_length=2000):
 # TODO think about how to handle counterarguments
 def generate_arguments():
     import google.genai
-    try:
-        asyncio.get_event_loop()
-    except RuntimeError:
-        asyncio.set_event_loop(asyncio.new_event_loop())
     text = st.session_state["text"]
     prompt = f"""You are an advanced argument analysis system. 
                 Given a text, identify each distinct argument and return them in structured JSON format.
@@ -36,7 +31,6 @@ def generate_arguments():
     # Clean up the response text if it starts with ```json and ends with ```
     if arguments.startswith("```json") and arguments.endswith("```"):
         arguments = arguments[7:-3].strip()
-
     try:
         st.session_state["arguments"] = json.loads(arguments) 
     except json.JSONDecodeError as e:
@@ -45,6 +39,6 @@ def generate_arguments():
         
     general_feedback = client.models.generate_content(
                                    model="gemini-2.0-flash",
-                                   contents=f"Given the following text, provide short, general feedback on the paper draft: {text}",
+                                   contents=f"Given the following text, provide general feedback on the paper draft, no longer than 150 words: {text}",
     )
     st.session_state["general_feedback"] = general_feedback.text

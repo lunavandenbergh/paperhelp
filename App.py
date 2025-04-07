@@ -11,18 +11,19 @@ with open( "assets/style.css" ) as css:
 
 explanation = st.container()
 with explanation:
-    st.title("Upload Your Paper for AI-Powered Feedback")
-    st.write("Welcome! This tool provides AI-driven feedback on your scientific paper or draft, helping you refine your writing with insights on:")
-    st.write("✅ Clarity & Structure – Enhance coherence and organization.")
-    st.write("✅ Grammar & Style – Improve clarity, readability, and academic tone.")
-    st.write("✅ Argument Strength – Receive structured feedback on arguments.")
-    st.write("✅ Actionable Suggestions – Get specific, practical recommendations for improvement.")
+    st.write("""
+             <div id='front-title'>Upload Your Paper for AI-Powered Feedback</div><br>
+             <div	class='explanation'>
+             Welcome! This tool provides AI-driven feedback on your scientific paper or draft, helping you refine your writing with insights on:<br>
+             ✅ Clarity & Structure – Enhance coherence and organization.<br>
+             ✅ Grammar & Style – Improve clarity, readability, and academic tone.<br>
+             ✅ Argument Strength – Receive structured feedback on arguments.<br>
+             ✅ Actionable Suggestions – Get specific, practical recommendations for improvement.<br>
+             🔹 Upload your PDF file below to begin. Your document will be processed, and you'll receive interactive feedback in just a few moments.<br>
+             💡 Need help? You can chat with the AI assistant at any time for clarification or further research suggestions.
+             """, unsafe_allow_html=True)
 
-    st.write("🔹 Upload your PDF file below to begin. Your document will be processed, and you'll receive interactive feedback in just a few moments.")
-
-    st.write("💡 Need help? You can chat with the AI assistant at any time for clarification or further research suggestions.")
-
-    uploaded_file = st.file_uploader("Upload your paper in PDF format here:", type="pdf")
+    uploaded_file = st.file_uploader("Upload your paper in PDF format here:", type="pdf", key="file_uploader_text")
 
 def initialize_app():
     for filename in os.listdir("uploads"):
@@ -48,14 +49,13 @@ if uploaded_file is not None:
     import pymupdf4llm
 
     text = pymupdf4llm.to_markdown(save_path)
-    
     text = re.sub(r'\$', r'\\$', text)
-    text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
+    #text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
     text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
     
     st.session_state["text"] = text
     st.session_state["pdf_path"] = uploaded_file.name  
-
+    
     print(f"Going to the next page... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
     st.switch_page("pages/Feedback.py")
     
