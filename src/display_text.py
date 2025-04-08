@@ -1,7 +1,7 @@
 import html
 import streamlit	as st
 import re
-from src.text_corrections import highlight_text
+from src.text_corrections import highlight_text_arguments, highlight_text_corrections
 
 def ignore_correction(start, end):
     st.session_state["ignored_corrections"].append((start, end))
@@ -20,40 +20,33 @@ def display_feedback():
             long_argument = argument['context']
             arguments_container.write(
                 f"""
-																<div class='item-argumentation'>
-																    <div class='expandable-text'>Full argument: <b>{long_argument}</b></div>
-																				<div class='arg-part'><i>Claim:</i> {argument['parts']['claim']}<br><br>
-																				<i>Evidence:</i> {argument['parts']['evidence']}</div> 
-																				<div class='arg-part'><i>Counterargument:</i> {argument['parts']['counterargument']}</div> 
-																				<div class='arg-part'><i>Feedback:</i> {argument['feedback']}<br><br>
-																				<i>Actionable feedback:</i> {argument['actionable_feedback']}</div>
-																</div>
-																""", unsafe_allow_html=True)
+                <div class='item-argumentation'>
+                    <div class='expandable-text'>Full argument: <b>{long_argument}</b></div>
+                    <div class='arg-part'><i>Claim:</i> {argument['parts']['claim']}<br><br>
+                    <i>Evidence:</i> {argument['parts']['evidence']}</div> 
+                    <div class='arg-part'><i>Counterargument:</i> {argument['parts']['counterargument']}</div> 
+                    <div class='arg-part'><i>Feedback:</i> {argument['feedback']}<br><br>
+                    <i>Actionable feedback:</i> {argument['actionable_feedback']}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
     if feedback_type == "Corrections":
-        corrections = st.session_state["corrections"]
+        corrections_llm = st.session_state["corrections_llm"]
         corrections_container = st.container(height=868, border=False)
         with corrections_container:
-            for correction in corrections:
-                start = correction["offset"]
-                end = start + correction["length"]
-                error_word = st.session_state["text"][start:end]
-                # suggestion = ", ".join(correction["suggestion"])
-                suggestion = correction["suggestion"][0] if len(correction["suggestion"]) > 0 else "No suggestion"
-                if correction["type"] == "misspelling":
-                    st.write(f"<div class='item-spelling' title='{html.escape(suggestion)}'>{error_word} → <span style='color: red'><b>{suggestion}</b></span><br><small>Spelling mistake</small></div>",	unsafe_allow_html=True)
-                elif correction["type"] == "grammar":
-                    st.write(f"<div class='item-grammar' title='{html.escape(suggestion)}'>{error_word} → <span style='color: blue'><b>{suggestion}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
-    
-    if feedback_type == "Style":
-        corrections = st.session_state["corrections"]
-        for correction in corrections:
-            start = correction["offset"]
-            end = start + correction["length"]
-            error_word = st.session_state["text"][start:end]
-            if correction["type"] == "style":
-                st.write(f"<div class='item-style' title='{html.escape(suggestion)}'>{error_word} → <span style='color: blue'><b>{suggestion}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
-
+            for correction in corrections_llm:
+                if correction["type"] == "spelling":
+                    st.write(f"<div class='item-spelling' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: red'><b>{correction['suggestion']}</b></span><br><small>Spelling mistake</small></div>",	unsafe_allow_html=True)
+                    continue
+                if correction["type"] == "grammar":
+                    st.write(f"<div class='item-grammar' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: blue'><b>{correction['suggestion']}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
+                    continue
+                if correction["type"] == "style":
+                    st.write(f"<div class='item-style' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: green'><b>{correction['suggestion']}</b></span><br><small>Style suggestion</small></div>",	unsafe_allow_html=True)
+                    continue
+                else:
+                    st.write(f"<div class='item-other' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: purple'><b>{correction['suggestion']}</b></span><br><small>Other</small></div>",	unsafe_allow_html=True)
+            
 def display_text():
     
     feedback_type = st.session_state["feedback_type"]
@@ -78,11 +71,11 @@ def display_text():
                     "length": len(arg),
                     "type": "argument"
                 })
-        highlighted_text = highlight_text(st.session_state["text"], corrections)
+        highlighted_text = highlight_text_arguments(st.session_state["text"], corrections)
         st.markdown(highlighted_text, unsafe_allow_html=True)
     elif feedback_type == "Corrections":
-        corrections = st.session_state["corrections"]
-        highlighted_text = highlight_text(st.session_state["text"], corrections)
+        corrections = st.session_state["corrections_llm"]
+        highlighted_text = highlight_text_corrections(st.session_state["text"], corrections)
         st.markdown(highlighted_text, unsafe_allow_html=True)
     else:
         st.markdown(st.session_state["text"], unsafe_allow_html=True)

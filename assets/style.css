@@ -43,7 +43,7 @@ html, body, [class*="css"] { /* Title of user text */
 .st-key-args button,
 .st-key-style button,
 .st-key-general button {
-	background-color: #ececec;
+	background-color: #f8f8f8;
 	border: 1px	solid #c1c1c1;
 	color: #393939;
 	font-size: 15px;
@@ -59,6 +59,8 @@ html, body, [class*="css"] { /* Title of user text */
 	background-color: #f3f3f3;
 	border: 1px	solid #d2d2d2;
 	font-size: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .item-general {
@@ -70,6 +72,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
 }
 
 .item-spelling {
@@ -81,6 +85,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
 }
 
 .item-grammar {
@@ -92,6 +98,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
 }
 
 .item-style {
@@ -103,6 +111,21 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
+}
+
+.item-other {
+	border-left: purple 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+ align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
 }
 
 .item-argumentation {
@@ -114,6 +137,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 20px;
  justify-content: space-between;
  align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
 }
 
 .arg-part {
@@ -171,18 +196,17 @@ html, body, [class*="css"] { /* Title of user text */
 	color: red;
 }
 
-.st-key-text_container {
-	border-radius: 30px;
-	font-size: 15px !important;
-}
+/*.st-key-text_container {
+	background-color: #f1f1f1;
+}*/
 
 .st-key-arguments_container {
 	color: rgb(8, 8, 8);
 }
 
 div[data-testid="stColumn"] {
-	background-color: #f8f8f8;
-	border: #f8f8f8 2px solid;
+	background-color: #f3f3f3;
+	border: #f3f3f3 2px solid;
 }
 
 #joe 

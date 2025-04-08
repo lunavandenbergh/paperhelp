@@ -53,6 +53,9 @@ if uploaded_file is not None:
     #text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
     text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
     
+    text = text.replace("# ", "### ") # Make sure title is a header
+    text = text.replace("#######", "######") # Make sure smallest header	is a header
+    
     st.session_state["text"] = text
     st.session_state["pdf_path"] = uploaded_file.name  
     

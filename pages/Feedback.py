@@ -1,4 +1,3 @@
-import json
 import time
 from openai import OpenAI
 import streamlit as st
@@ -12,7 +11,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
     layout="wide")
 
-
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
 
 st.title("Scientific Writing Feedback Tool")
@@ -24,16 +22,10 @@ import chromadb
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
 
-if "corrections" not in st.session_state or not isinstance(st.session_state["corrections"], list):
-    tic = time.time()
-    from src.text_corrections import get_corrections
-    st.session_state["corrections"] = get_corrections()
-    toc = time.time()
-    print(f"Text correction took {toc - tic:.2f} seconds")
+if "corrections_llm" not in st.session_state:
     tic = time.time()
     from src.text_corrections import get_corrections_llm
     get_corrections_llm()
-    print(st.session_state["corrections_llm"])
     toc = time.time()
     print(f"Text correction (llm) took {toc - tic:.2f} seconds")
 
