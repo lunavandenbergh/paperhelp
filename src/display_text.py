@@ -86,7 +86,7 @@ def display_message(text,citations):
         citations_in_text = re.findall(r"\[\d+\]", text)
         for citation in citations_in_text:
             number = citation[1]
-            citation_from_list = citations[int(number)-1]
+            citation_from_list = citations.urls[int(number)-1].url
             updated_text = updated_text.replace(citation, 
             # TODO link ipv span title
                 f"<span title='{citation_from_list}' style='border-bottom: 1px dashed blue;'>{citation}</span>")
@@ -99,6 +99,6 @@ def display_message(text,citations):
 def display_citations(citations):
     with st.expander("See citations"): #of popover
         i = 1
-        for citation in citations:
-            st.write(f"[{i}] {citation}")
+        for citation_url in citations.urls:
+            st.write(f"[{i}] {citation_url.url}")
             i += 1
