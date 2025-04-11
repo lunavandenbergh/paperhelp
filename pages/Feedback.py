@@ -107,7 +107,7 @@ if "agent_perplexity" not in st.session_state:
             """),
         markdown=True,
     )
-    st.session_state["agent"] = client
+    st.session_state["agent_perplexity"] = client
     toc = time.time()
     print(f"Initializing assistant took {toc - tic:.2f} seconds")
 
