@@ -7,7 +7,6 @@ from agno.tools.duckduckgo import DuckDuckGoTools
 from agno.agent import Agent
 from textwrap import dedent
 from agno.knowledge.pdf import PDFKnowledgeBase, PDFReader
-from agno.vectordb.chroma import ChromaDb
 from agno.models.openai import OpenAIChat
 from agno.team.team import Team
 
