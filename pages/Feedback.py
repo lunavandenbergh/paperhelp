@@ -25,7 +25,8 @@ st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_all
 st.title("Scientific Writing Feedback Tool")
 
 from src.display_text import display_citations, display_feedback, display_message, display_text
-import chromadb
+from agno.vectordb.lancedb import LanceDb
+from agno.vectordb.search import SearchType
 
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
@@ -37,19 +38,16 @@ if "corrections_llm" not in st.session_state:
     toc = time.time()
     print(f"Text correction (llm) took {toc - tic:.2f} seconds")
 
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-4o-mini"
-    openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-    st.session_state["openai_client"] = openai_client
-    chroma_client = chromadb.PersistentClient()
-    st.session_state["chroma_client"] = chroma_client
-
 if "agent_openai"	not in st.session_state:
     tic = time.time()
 
     knowledge_base = PDFKnowledgeBase(
         path = f"./uploads/{st.session_state['pdf_path']}",
-        vector_db=ChromaDb(collection="pdfs"),
+        vector_db=LanceDb(
+        table_name="pdfs",
+        uri="/tmp/lancedb",
+        search_type=SearchType.keyword,
+        ),
     )
     knowledge_base.load()
     researcher = Agent(
