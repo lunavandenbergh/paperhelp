@@ -21,7 +21,8 @@ html, body, [class*="css"] { /* Title of user text */
 }
 
 #your-paper,
-#feedback {
+#feedback,
+#feedback-assistant {
 	font-size: 28px;
 	font-family: "Poppins", sans-serif;
 	font-weight: 700;
@@ -204,11 +205,24 @@ html, body, [class*="css"] { /* Title of user text */
 	color: rgb(8, 8, 8);
 }
 
+/*[class*="argument_container"] {
+	border-left: orange 2px solid;
+	background-color: #f8f8f8;
+	padding: 15px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 20px;
+ justify-content: space-between;
+ align-items: center;
+	font-size: 13px;
+	font-family: "Poppins", sans-serif;
+}*/
+
+.st-key-general_feedback_container {
+	color: black;
+}
+
 div[data-testid="stColumn"] {
 	background-color: #f3f3f3;
 	border: #f3f3f3 2px solid;
 }
-
-#joe 
-{
-	background-color: pink;}

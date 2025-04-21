@@ -3,10 +3,9 @@ import streamlit as st
 import html
 
 def get_corrections_llm():
-    import google.genai
-    text = st.session_state["text"]
-    prompt = f"""You are a language correction system. 
-                Given a text, identify each error (spelling, grammar, style, ...) and return them in structured JSON format.
+    agent = st.session_state["agent"]
+    prompt = f"""Given the user's paper draft text, identify each error (spelling, grammar, style, ...) and return them in structured JSON format.
+                You can ignore errors specific to citations, references, or bibliography.
                 Your response has to be processed as a string that directly becomes a JSON object.
                 Each error should be treated as a standalone unit and should include the following details:
                 - error: The exact error in the text.
@@ -14,24 +13,18 @@ def get_corrections_llm():
                 - suggestion: The most likely suggestion	for the error.
                 - offset: The starting position of the error in the text, counted in characters from the start of the text.
                 - length: The length of the error in the text.
-                - type: The type of error (spelling, grammar, style, ...).
-                
-                Here's the text: {text}"""
+                - type: The type of error (spelling, grammar, style, ...)."""
 
-    client = google.genai.Client(api_key=str(st.secrets["GEMINI_API_KEY"]))
-    response = client.models.generate_content(
-        model="gemini-2.0-flash", 
-        contents=prompt,
-    )
-    arguments = response.text
+    response = agent.run(prompt)
+    corrections = response.content
     # Clean up the response text if it starts with ```json and ends with ```
-    if arguments.startswith("```json") and arguments.endswith("```"):
-        arguments = arguments[7:-3].strip()
+    if corrections.startswith("```json") and corrections.endswith("```"):
+        corrections = corrections[7:-3].strip()
     try:
-        st.session_state["corrections_llm"] = json.loads(arguments) 
+        st.session_state["corrections_llm"] = json.loads(corrections) 
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
-        st.session_state["corrections_llm"] = None 
+        get_corrections_llm()  # Retry if JSON decoding fails 
 
 
 def highlight_text_arguments(text, corrections):

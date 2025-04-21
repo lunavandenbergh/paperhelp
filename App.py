@@ -4,7 +4,10 @@ import os
 import time
 
 st.set_page_config(page_title="Upload your PDF!", 
-                   page_icon="📄")
+                   page_icon="📄",
+																			initial_sidebar_state="collapsed",
+																			layout="centered"
+																			)
 
 with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)

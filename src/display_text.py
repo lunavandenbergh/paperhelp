@@ -1,7 +1,8 @@
 import html
-import streamlit	as st
 import re
+import streamlit	as st
 from src.text_corrections import highlight_text_arguments, highlight_text_corrections
+from src.find_arguments import generate_papers
 
 def ignore_correction(start, end):
     st.session_state["ignored_corrections"].append((start, end))
@@ -11,24 +12,56 @@ def display_feedback():
     feedback_type = st.session_state["feedback_type"]
 
     if feedback_type == "General":
-        st.write(f"<div class='item-general'>{st.session_state['general_feedback']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='item-general'>{st.session_state['general_feedback']}</div>", unsafe_allow_html=True)
 
     if feedback_type == "Arguments":
         arguments_container = st.container(height=868, border=False, key="arguments_container")
         arguments = st.session_state["arguments"]
+        i = 0
         for argument in arguments["arguments"]:
             long_argument = argument['context']
-            arguments_container.write(
-                f"""
-                <div class='item-argumentation'>
-                    <div class='expandable-text'>Full argument: <b>{long_argument}</b></div>
-                    <div class='arg-part'><i>Claim:</i> {argument['parts']['claim']}<br><br>
-                    <i>Evidence:</i> {argument['parts']['evidence']}</div> 
-                    <div class='arg-part'><i>Counterargument:</i> {argument['parts']['counterargument']}</div> 
-                    <div class='arg-part'><i>Feedback:</i> {argument['feedback']}<br><br>
-                    <i>Actionable feedback:</i> {argument['actionable_feedback']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+            if st.session_state["updated_arguments"][i] == False:
+                with arguments_container:
+                    argument_container = st.container(border=True)
+                    with argument_container:
+                        st.markdown(f"Full argument: **{long_argument}**")
+                        parts_argument_container = st.container(border=True)
+                        with parts_argument_container:
+                            st.markdown(f"Claim: {argument['parts']['claim']}")
+                            st.markdown(f"Evidence: {argument['parts']['evidence']}")
+                        improvements_container = st.container(border=True)
+                        with improvements_container:
+                            st.markdown(f"What is wrong with this argument? {argument['feedback']}")
+                            st.markdown(f"How to improve this argument? {argument['actionable_feedback']}")
+                        relevant_literature_container = st.container(border=True)
+                        with relevant_literature_container:
+                            st.markdown(f"Relevant literature: **... Loading ...**")
+                            button_key = f"literature_button_{i}"
+                            literature_button = st.button("Load relevant literature", key=button_key, help="Load relevant literature for this argument. Might take a while.")
+                            if literature_button:
+                                generate_papers(i)
+            elif st.session_state["updated_arguments"][i] == True:
+                with arguments_container:
+                    argument_container = st.container(border=True, key=f"argument_container_{i}")
+                    with argument_container:
+                        st.markdown(f"Full argument: **{long_argument}**")
+                        parts_argument_container = st.container(border=True)
+                        with parts_argument_container:
+                            st.markdown(f"Claim: {argument['parts']['claim']}")
+                            st.markdown(f"Evidence: {argument['parts']['evidence']}")
+                        improvements_container = st.container(border=True)
+                        with improvements_container:
+                            st.markdown(f"What is wrong with this argument? {argument['feedback']}")
+                            st.markdown(f"How to improve this argument? {argument['actionable_feedback']}")
+                        relevant_literature_container = st.container(border=True)
+                        with relevant_literature_container:
+                            st.markdown(f"Relevant literature")
+                            st.markdown(f"{argument['counterargument']['general']}")
+                            for paper in argument['counterargument']['papers']:
+                                st.markdown(f"[{paper['title']}]({paper['url']}) by {paper['authors']} ({paper['year']})")
+                                st.markdown(f"- URL: {paper['url']}")
+                                st.markdown(f"- Abstract: {paper['abstract']}")
+            i = i + 1
 
     if feedback_type == "Corrections":
         corrections_llm = st.session_state["corrections_llm"]
@@ -86,7 +119,7 @@ def display_message(text,citations):
         citations_in_text = re.findall(r"\[\d+\]", text)
         for citation in citations_in_text:
             number = citation[1]
-            citation_from_list = citations.urls[int(number)-1].url
+            citation_from_list = citations["urls"][int(number)-1]["url"]
             updated_text = updated_text.replace(citation, 
             # TODO link ipv span title
                 f"<span title='{citation_from_list}' style='border-bottom: 1px dashed blue;'>{citation}</span>")
@@ -97,8 +130,8 @@ def display_message(text,citations):
     return updated_text
     
 def display_citations(citations):
-    with st.expander("See citations"): #of popover
+    with st.expander("Sources used for this answer"):
         i = 1
         for citation_url in citations.urls:
-            st.write(f"[{i}] {citation_url.url}")
+            st.write(f"[{i}] {citation_url.url}") # TODO title of paper/website as link
             i += 1
