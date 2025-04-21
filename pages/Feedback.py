@@ -28,16 +28,6 @@ if "feedback_type" not in st.session_state:
 if "agent"	not in st.session_state:
     tic = time.time()
 
-    knowledge_base = PDFKnowledgeBase(
-        path = f"./uploads/{st.session_state['pdf_path']}",
-        vector_db=LanceDb(
-        table_name="pdfs",
-        uri="/tmp/lancedb",
-        search_type=SearchType.vector,
-        ),
-    )
-    knowledge_base.load()
-
     researcher = Agent(
         model=Perplexity(id="sonar-pro",api_key=st.secrets["PERPLEXITY_API_KEY"]),
         debug_mode=True,
