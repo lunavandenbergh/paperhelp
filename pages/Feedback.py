@@ -3,9 +3,6 @@ import streamlit as st
 from agno.agent import Agent
 from textwrap import dedent
 from agno.models.perplexity import Perplexity
-from agno.knowledge.pdf import PDFKnowledgeBase
-from agno.vectordb.lancedb import LanceDb
-from agno.vectordb.search import SearchType
 from src.display_text import display_citations, display_feedback, display_message, display_text
 from src.find_arguments import	generate_arguments
 
