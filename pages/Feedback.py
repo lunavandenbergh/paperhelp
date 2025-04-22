@@ -10,14 +10,24 @@ tic_overall = time.time()
 print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
 
 st.set_page_config(
-    page_title="Scientific Writing: Feedback Tool", 
+    page_title="Paper Feedback Tool", 
     page_icon="📄",
     initial_sidebar_state="collapsed",
     layout="wide")
 
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
 
-st.title("Scientific Writing Feedback Tool")
+st.title("Paper Feedback Tool")
+
+@st.dialog("Your paper feedback is ready!")
+def instructions():
+				st.write("")
+				st.write("On the left, you can see your paper draft, and on the right, you can choose between three types of feedback:")
+				st.write("1. **General**: General feedback on your paper draft.")
+				st.write("2. **Arguments**: Feedback on the arguments in your paper draft.")
+				st.write("3. **Corrections**: Corrections for spelling, grammar, and style in your paper draft.")
+				st.write("A **feedback assistant** is available in the sidebar. You can ask it anything about your paper draft or relevant literature.")
+
 
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
@@ -79,13 +89,15 @@ left_col, right_col = st.columns(spec=[8,5],border=True)
 
 with left_col:
     st.subheader("Your Paper")
-    text_container = st.container(height=500,border=True, key="text_container")
+    text_container = st.container(height=655,border=False, key="text_container")
     with text_container:
         display_text()
-    st.subheader("Feedback Assistant")
-    chat_container = st.container(height=400, border=True, key="chat_container")
+
+with st.sidebar:
+    st.header("Feedback Assistant")
+    chat_container = st.container(height=610, border=False, key="chat_container")
     with chat_container:
-        chat = st.container(height=310, border=False)
+        chat = st.container(height=520, border=False)
         with chat:
             for message in st.session_state.messages:
                 with st.chat_message(message["role"]):
@@ -122,6 +134,10 @@ with right_col:
             st.rerun()
             
     display_feedback()
+
+if "instructions_done" not in st.session_state:
+    instructions()
+    st.session_state["instructions_done"] = True
 
 toc_overall = time.time()
 print(f"Overall execution time: {toc_overall - tic_overall:.2f} seconds")

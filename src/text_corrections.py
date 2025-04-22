@@ -3,20 +3,27 @@ import streamlit as st
 import html
 
 def get_corrections_llm():
-    agent = st.session_state["agent"]
-    prompt = f"""Given the user's paper draft text, identify each error (spelling, grammar, style, ...) and return them in structured JSON format.
-                You can ignore errors specific to citations, references, or bibliography.
-                Your response has to be processed as a string that directly becomes a JSON object.
-                Each error should be treated as a standalone unit and should include the following details:
-                - error: The exact error in the text.
-                - context: The sentence	or containing the error.
-                - suggestion: The most likely suggestion	for the error.
-                - offset: The starting position of the error in the text, counted in characters from the start of the text.
-                - length: The length of the error in the text.
-                - type: The type of error (spelling, grammar, style, ...)."""
-
-    response = agent.run(prompt)
-    corrections = response.content
+    import google.genai
+    text = st.session_state["text"]
+    prompt = f"""You are a language correction system. 
+                 Given a text, identify each error (spelling, grammar, style, ...) and return them in structured JSON format.
+                 Your response has to be processed as a string that directly becomes a JSON object.
+                 Each error should be treated as a standalone unit and should include the following details:
+                 - error: The exact error in the text.
+                 - context: The sentence	or containing the error.
+                 - suggestion: The most likely suggestion	for the error.
+                 - offset: The starting position of the error in the text, counted in characters from the start of the text.
+                 - length: The length of the error in the text.
+                 - type: The type of error (spelling, grammar, style, ...).
+                 
+                 Here's the text: {text}"""
+ 
+    client = google.genai.Client(api_key=str(st.secrets["GEMINI_API_KEY"]))
+    response = client.models.generate_content(
+         model="gemini-2.0-flash", 
+         contents=prompt,
+    )
+    corrections = response.text
     # Clean up the response text if it starts with ```json and ends with ```
     if corrections.startswith("```json") and corrections.endswith("```"):
         corrections = corrections[7:-3].strip()
@@ -83,10 +90,10 @@ def highlight_text_corrections(text, corrections):
                 f'<span style="border-bottom: 3px solid green;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
                 highlighted_text[end:]
             )
-        else:
-            highlighted_text = (
-                highlighted_text[:start] +
-                f'<span style="border-bottom: 3px solid purple;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
-                highlighted_text[end:]
-            )
+        #else:
+        #    highlighted_text = (
+        #        highlighted_text[:start] +
+        #        f'<span style="border-bottom: 3px solid purple;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
+        #        highlighted_text[end:]
+        #    )
     return highlighted_text

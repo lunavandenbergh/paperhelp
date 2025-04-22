@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Poppins&family=Raleway:wght@600&display=swap');
 
 
-html, body, [class*="css"] { /* Title of user text */
+/*html, body, [class*="css"] { 
 	font-size: 12px;
 	font-family: "Poppins", sans-serif;
-}
+}*/
 
 .stSidebar {
 	font-family: "Poppins", sans-serif;
 }
 
-#scientific-writing-feedback-tool {
+#paper-feedback-tool {
 	font-size: 48px;
 	font-family: "Poppins", sans-serif;
 	font-weight: 700;
@@ -64,7 +64,7 @@ html, body, [class*="css"] { /* Title of user text */
  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.item-general {
+.st-key-general_feedback_container {
 	border-left: grey 2px solid;
 	background-color: #f8f8f8;
 	padding: 15px;
@@ -86,8 +86,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
-	font-size: 13px;
-	font-family: "Poppins", sans-serif;
+	font-size: 1rem;
+	/*font-family: "Poppins", sans-serif;*/
 }
 
 .item-grammar {
@@ -99,8 +99,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
-	font-size: 13px;
-	font-family: "Poppins", sans-serif;
+	font-size: 1rem;
+	/*font-family: "Poppins", sans-serif;*/
 }
 
 .item-style {
@@ -112,8 +112,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
-	font-size: 13px;
-	font-family: "Poppins", sans-serif;
+	font-size: 1rem;
+	/*font-family: "Poppins", sans-serif;*/
 }
 
 .item-other {
@@ -125,8 +125,8 @@ html, body, [class*="css"] { /* Title of user text */
  margin-bottom: 10px;
  justify-content: space-between;
  align-items: center;
-	font-size: 13px;
-	font-family: "Poppins", sans-serif;
+	font-size: 1rem;
+	/*font-family: "Poppins", sans-serif;*/
 }
 
 .item-argumentation {
@@ -193,19 +193,38 @@ html, body, [class*="css"] { /* Title of user text */
  font-size: 15px;
 }
 
-.st-key-chat_container {
-	color: red;
+.st-key-chat_container,
+.st-key-text_container {
+	background-color: #f8f8f8;
+	padding: 1%;
+	border: rgb(217, 217, 217) 1px solid;
+	border-radius: 5px;
 }
 
-/*.st-key-text_container {
-	background-color: #f1f1f1;
-}*/
+.st-key-explanation {
+	background-color: #f7f6f6;
+	border: #f7f6f6 15px solid;
+	border-radius: 5px;
+}
+
 
 .st-key-arguments_container {
 	color: rgb(8, 8, 8);
 }
 
-/*[class*="argument_container"] {
+[class*="argument_parts_container_"],
+[class*="improvements_container_"],
+[class*="relevant_literature_container_"] {
+	background-color: white;
+	background-color: #f8f8f8;
+	padding: 10px;
+ border-radius: 8px;
+ box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ margin-bottom: 10px;
+ justify-content: space-between;
+}
+
+[class*="argument_container_"] {
 	border-left: orange 2px solid;
 	background-color: #f8f8f8;
 	padding: 15px;
@@ -213,10 +232,9 @@ html, body, [class*="css"] { /* Title of user text */
  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
  margin-bottom: 20px;
  justify-content: space-between;
- align-items: center;
 	font-size: 13px;
 	font-family: "Poppins", sans-serif;
-}*/
+}
 
 .st-key-general_feedback_container {
 	color: black;

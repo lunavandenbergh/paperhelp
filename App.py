@@ -5,26 +5,23 @@ import time
 
 st.set_page_config(page_title="Upload your PDF!", 
                    page_icon="📄",
-																			initial_sidebar_state="collapsed",
-																			layout="centered"
-																			)
+                   initial_sidebar_state="collapsed",
+                   layout="centered"
+                   )
 
 with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
-explanation = st.container()
+#for key in st.session_state.keys():
+#    del st.session_state[key]
+
+st.title("Paper Feedback Tool")
+explanation = st.container(key="explanation")
 with explanation:
-    st.write("""
-             <div id='front-title'>Upload Your Paper for AI-Powered Feedback</div><br>
-             <div	class='explanation'>
-             Welcome! This tool provides AI-driven feedback on your scientific paper or draft, helping you refine your writing with insights on:<br>
-             ✅ Clarity & Structure – Enhance coherence and organization.<br>
-             ✅ Grammar & Style – Improve clarity, readability, and academic tone.<br>
-             ✅ Argument Strength – Receive structured feedback on arguments.<br>
-             ✅ Actionable Suggestions – Get specific, practical recommendations for improvement.<br>
-             🔹 Upload your PDF file below to begin. Your document will be processed, and you'll receive interactive feedback in just a few moments.<br>
-             💡 Need help? You can chat with the AI assistant at any time for clarification or further research suggestions.
-             """, unsafe_allow_html=True)
+    st.markdown("**Welcome!** This tool provides **AI-generated feedback** on your **scientific paper draft**, helping you refine your writing with a focus on **argument feedback**.")
+    st.divider()
+    st.markdown("**Upload your PDF file** below to begin. Your document will be processed, and you'll receive feedback in just a few moments. *Note:* The tool is optimized for short drafts. Generating your feedback might take longer for larger documents.")
+    st.markdown("**Need help?** You can chat with the **feedback assistant** at any time for clarification or further research suggestions.")
 
     uploaded_file = st.file_uploader("Upload your paper in PDF format here:", type="pdf", key="file_uploader_text")
 

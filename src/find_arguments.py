@@ -3,7 +3,8 @@ import json
 
 
 def generate_arguments():
-    agent = st.session_state["agent"]
+    import google.genai
+    text = st.session_state["text"]
     prompt = f"""Given the user's paper draft, identify each distinct argument and return them in structured JSON format.
                 Your response has to be processed as a string that directly becomes a JSON object.
                 Each argument should be treated as a standalone unit and should include the following details:
@@ -11,12 +12,18 @@ def generate_arguments():
                 - parts: Breakdown of the argument into:
                   - claim: The main assertion or statement being argued.
                   - evidence: Factual or logical support for the claim.
-                - counterargument: A potential rebuttal or opposing viewpoint to the claim.
+                - counterargument: Empty by default. This will be filled in later.
                 - feedback: Analysis of the arguments weaknesses, such as logical fallacies, lack of clarity, or weak evidence.
-                - actionable_feedback: Specific steps to improve the argument."""
+                - actionable_feedback: Specific steps to improve the argument.
+																
+																The paper draft:	{text}"""
 
-    response = agent.run(prompt)
-    arguments = response.content
+    client = google.genai.Client(api_key=str(st.secrets["GEMINI_API_KEY"]))
+    response = client.models.generate_content(
+         model="gemini-2.0-flash", 
+         contents=prompt,
+    )
+    arguments = response.text
     
     # Clean up the response text
     if arguments.startswith("```json") and arguments.endswith("```"):
@@ -28,6 +35,7 @@ def generate_arguments():
         print(f"Error decoding JSON: {e}. Retrying...")
         generate_arguments() 
 
+    agent = st.session_state["agent"]
     query = f"Given the user's paper draft text, provide general feedback on it, no longer than 150 words. Don't cite anything."
     general_feedback = agent.run(query)
     st.session_state["general_feedback"] = general_feedback.content
