@@ -7,6 +7,7 @@ def generate_arguments():
     text = st.session_state["text"]
     prompt = f"""Given the user's paper draft, identify each distinct argument and return them in structured JSON format.
                 Your response has to be processed as a string that directly becomes a JSON object.
+                The JSON object should contain one	field called "arguments", which is a list of the arguments.
                 Each argument should be treated as a standalone unit and should include the following details:
                 - context: The full argument. Please keep any mistakes or errors in the text as they are.
                 - parts: Breakdown of the argument into:
