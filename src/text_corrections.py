@@ -1,4 +1,5 @@
 import json
+import re
 import streamlit as st
 import html
 
@@ -40,11 +41,27 @@ def highlight_text_arguments(text, corrections):
         start = correction["offset"]
         end = start + correction["length"]
         error_text = text[start:end]
-        highlighted_text = (
-            highlighted_text[:start] +
-            f'<span style="border-bottom: 3px solid orange;">{error_text}</span>' +
-            highlighted_text[end:]
-        )
+        # als er \n in de tekst staat, span aflsuiten en volgende lijn in een nieuwe span zetten
+        if "\n\n" in error_text:
+            lines = error_text.split("\n\n")
+            updated_text = ""
+            for line in lines:
+                if lines.index(line) != len(lines) - 1:
+                    updated_text += f'<span style="border-bottom: 3px solid orange;">{line}</span>\n\n'
+                else:
+                    updated_text += f'<span style="border-bottom: 3px solid orange;">{line}</span>'
+            highlighted_text = (
+                highlighted_text[:start] +
+                updated_text +
+                highlighted_text[end:]
+            )
+        else:
+            highlighted_text = (
+                highlighted_text[:start] +
+                f'<span style="border-bottom: 3px solid orange;">{error_text}</span>' +
+                highlighted_text[end:]
+            )
+        
     return highlighted_text
 
 

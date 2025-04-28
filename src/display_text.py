@@ -102,19 +102,26 @@ def display_text():
             start = normalized_text.find(arg.replace('\n',' '))
             if start != -1:
                 corrections.append({
-                    "error": arg,
+                    "error": arg.replace('\n',' '),
                     "suggestion": ["Correction"],
                     "offset": start,
                     "length": len(arg),
                     "type": "argument"
                 })
             else:
-                # doe de trick met replacen van "  " in " " en dan nog eens zoeken
-                # eerst nog eens printen en bekijken of het wel klopt
-                print(f"-------")
-                print(f"Could not find argument: {arg.replace('\n',' ')}")
-
-        print("-----", normalized_text)       
+                start = normalized_text.find(arg[0:50])
+                if start != -1:
+                    corrections.append({
+                        "error": arg.replace('\n',' '),
+                        "suggestion": ["Correction"],
+                        "offset": start,
+                        "length": len(arg),
+                        "type": "argument"
+                    })
+                else:
+                    print(f"-------")
+                    print(f"Could not find argument: {arg}")
+      
         highlighted_text = highlight_text_arguments(st.session_state["text"], corrections)
         st.markdown(highlighted_text, unsafe_allow_html=True)
     elif feedback_type == "Corrections":

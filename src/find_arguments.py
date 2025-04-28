@@ -9,7 +9,7 @@ def generate_arguments():
                 Your response has to be processed as a string that directly becomes a JSON object.
                 The JSON object should contain one	field called "arguments", which is a list of the arguments.
                 Each argument should be treated as a standalone unit and should include the following details:
-                - context: The full argument. Please keep any mistakes or errors in the text as they are.
+                - context: The full argument. Please keep any mistakes or errors in the text as they are. Please keep the text as it is, within a single paragraph.
                 - parts: Breakdown of the argument into:
                   - claim: The main assertion or statement being argued.
                   - evidence: Factual or logical support for the claim.

@@ -5,6 +5,7 @@ from textwrap import dedent
 from agno.models.perplexity import Perplexity
 from src.display_text import display_citations, display_feedback, display_message, display_text
 from src.find_arguments import	generate_arguments
+import re
 
 tic_overall = time.time()
 print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
