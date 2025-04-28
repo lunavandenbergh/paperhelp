@@ -24,7 +24,7 @@ def instructions():
 				st.write("")
 				st.write("On the left, you can see your paper draft, and on the right, you can choose between three types of feedback:")
 				st.write("1. **General**: General feedback on your paper draft.")
-				st.write("2. **Arguments**: Feedback on the arguments in your paper draft.")
+				st.write("2. **Arguments**: Feedback on the different arguments in your paper draft. You will find a list of arguments present in your paper draft, and for each argument, you will receive feedback seperately.")
 				st.write("3. **Corrections**: Corrections for spelling, grammar, and style in your paper draft.")
 				st.write("A **feedback assistant** is available in the sidebar. You can ask it anything about your paper draft or relevant literature.")
 
