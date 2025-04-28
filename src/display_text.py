@@ -26,7 +26,7 @@ def display_feedback():
                 with arguments_container:
                     argument_container = st.container(border=False, key=f"argument_container_{i}")
                     with argument_container:
-                        st.markdown(f"Full argument: **{long_argument}**")
+                        st.markdown(f"Full argument: <strong>{long_argument.replace("*", "")}</strong>",unsafe_allow_html=True)
                         parts_argument_container = st.container(border=False, key=f"argument_parts_container_{i}")
                         with parts_argument_container:
                             st.markdown(f"**Claim**: {argument['parts']['claim']}")
@@ -46,7 +46,7 @@ def display_feedback():
                 with arguments_container:
                     argument_container = st.container(border=False, key=f"argument_container_{i}")
                     with argument_container:
-                        st.markdown(f"Full argument: **{long_argument}**")
+                        st.markdown(f"Full argument: **{long_argument.replace("*", "")}**")
                         parts_argument_container = st.container(border=False, key=f"argument_parts_container_{i}")
                         with parts_argument_container:
                             st.markdown(f"**Claim**: {argument['parts']['claim']}")
@@ -99,7 +99,7 @@ def display_text():
         corrections = []
         normalized_text = text.replace("\n", " ")
         for arg in all_arguments:
-            start = normalized_text.find(arg)
+            start = normalized_text.find(arg.replace('\n',' '))
             if start != -1:
                 corrections.append({
                     "error": arg,
@@ -108,6 +108,13 @@ def display_text():
                     "length": len(arg),
                     "type": "argument"
                 })
+            else:
+                # doe de trick met replacen van "  " in " " en dan nog eens zoeken
+                # eerst nog eens printen en bekijken of het wel klopt
+                print(f"-------")
+                print(f"Could not find argument: {arg.replace('\n',' ')}")
+
+        print("-----", normalized_text)       
         highlighted_text = highlight_text_arguments(st.session_state["text"], corrections)
         st.markdown(highlighted_text, unsafe_allow_html=True)
     elif feedback_type == "Corrections":

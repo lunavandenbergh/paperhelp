@@ -12,9 +12,6 @@ st.set_page_config(page_title="Upload your PDF!",
 with open( "assets/style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
-#for key in st.session_state.keys():
-#    del st.session_state[key]
-
 st.title("Paper Feedback Tool")
 explanation = st.container(key="explanation")
 with explanation:
@@ -48,16 +45,18 @@ if uploaded_file is not None:
     import re
     import pymupdf4llm
 
-    text = pymupdf4llm.to_markdown(save_path)
+    text = pymupdf4llm.to_markdown(save_path, hdr_info=False)
     text = re.sub(r'\$', r'\\$', text)
     #text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
-    text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
+    #text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
     
     text = text.replace("# ", "### ") # Make sure title is a header
     text = text.replace("#######", "######") # Make sure smallest header	is a header
     
     st.session_state["text"] = text
     st.session_state["pdf_path"] = uploaded_file.name  
+    
+    st.session_state["dry_run"] = False
     
     print(f"Going to the next page... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
     st.switch_page("pages/Feedback.py")

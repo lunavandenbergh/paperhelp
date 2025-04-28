@@ -40,10 +40,9 @@ def highlight_text_arguments(text, corrections):
         start = correction["offset"]
         end = start + correction["length"]
         error_text = text[start:end]
-        suggestion = correction["suggestion"]
         highlighted_text = (
             highlighted_text[:start] +
-            f'<span style="border-bottom: 3px solid orange;" title="{suggestion}">{error_text}</span>' +
+            f'<span style="border-bottom: 3px solid orange;">{error_text}</span>' +
             highlighted_text[end:]
         )
     return highlighted_text
@@ -75,25 +74,19 @@ def highlight_text_corrections(text, corrections):
         if correction["type"] == "spelling":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="border-bottom: 3px solid red;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
+                f'<span style="border-bottom: 3px solid red;" title="Suggestion: {suggestion}">{highlighted_text[start:end]}</span>' +
                 highlighted_text[end:]
             )
         elif correction["type"] == "grammar":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="border-bottom: 3px solid blue;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
+                f'<span style="border-bottom: 3px solid blue;" title="Suggestion: {suggestion}">{highlighted_text[start:end]}</span>' +
                 highlighted_text[end:]
             )
         elif correction["type"] == "style":
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="border-bottom: 3px solid green;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
+                f'<span style="border-bottom: 3px solid green;" title="Suggestion: {suggestion}">{highlighted_text[start:end]}</span>' +
                 highlighted_text[end:]
             )
-        #else:
-        #    highlighted_text = (
-        #        highlighted_text[:start] +
-        #        f'<span style="border-bottom: 3px solid purple;" title="{suggestion}">{highlighted_text[start:end]}</span>' +
-        #        highlighted_text[end:]
-        #    )
     return highlighted_text

@@ -28,6 +28,15 @@ def instructions():
 				st.write("3. **Corrections**: Corrections for spelling, grammar, and style in your paper draft.")
 				st.write("A **feedback assistant** is available in the sidebar. You can ask it anything about your paper draft or relevant literature.")
 
+if st.session_state["dry_run"] == True:
+				st.session_state["feedback_type"] = "General"
+				st.session_state["arguments"] = {"arguments": [{"context" : "This is context.",
+                                                    "parts" : {"claim" : "This is claim.", "evidence" : "This is evidence."},
+																																																				"counterargument" : "This is counterargument.",
+																																																				"feedback" : "This is feedback.",
+																																																				"actionable_feedback" : "This is actionable feedback."}]}
+				st.session_state["general_feedback"] = "This is general feedback."
+				st.session_state["corrections_llm"] = []
 
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
@@ -41,8 +50,11 @@ if "agent"	not in st.session_state:
         description=dedent(f"""\
             You are an academic assistant that provides feedback on research paper drafts. 
             The user has uploaded a draft, which is at the end of this description.
+												This can be a scientific paper, a thesis, or any other type of research paper.
+												It is important to note that it can also be part of a larger document. 
+												Please keep this in mind when providing feedback.
             You can be asked by the system to provide feedback on the paper,
-												but you can also be asked anything by the user.
+												but you can also be asked anything else by the user.
 
             You also can be asked to generate new text or provide scientific papers on a certain topic. 
                        
