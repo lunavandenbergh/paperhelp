@@ -51,7 +51,7 @@ if "agent"	not in st.session_state:
         description=dedent(f"""\
             You are an academic assistant that provides feedback on research paper drafts. 
             The user has uploaded a draft, which is at the end of this description.
-												This can be a scientific paper, a thesis, or any other type of research paper.
+												This can be a scientific paper, a thesis, or any other type of research-related document.
 												It is important to note that it can also be part of a larger document. 
 												Please keep this in mind when providing feedback.
             You can be asked by the system to provide feedback on the paper,

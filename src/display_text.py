@@ -72,14 +72,18 @@ def display_feedback():
         corrections_container = st.container(height=600, border=False)
         with corrections_container:
             for correction in corrections_llm:
+                if correction["suggestion"] is not None:
+                    suggestion	= html.escape(correction["suggestion"])
+                else:
+                    suggestion = ""
                 if correction["type"] == "spelling":
-                    st.write(f"<div class='item-spelling' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: red'><b>{correction['suggestion']}</b></span><br><small>Spelling mistake</small></div>",	unsafe_allow_html=True)
+                    st.write(f"<div class='item-spelling' title='{html.escape(suggestion)}'>{correction['error']} → <span style='color: red'><b>{correction['suggestion']}</b></span><br><small>Spelling mistake</small></div>",	unsafe_allow_html=True)
                     continue
                 if correction["type"] == "grammar":
-                    st.write(f"<div class='item-grammar' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: blue'><b>{correction['suggestion']}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
+                    st.write(f"<div class='item-grammar' title='{html.escape(suggestion)}'>{correction['error']} → <span style='color: blue'><b>{correction['suggestion']}</b></span><br><small>Grammar mistake</small></div>",	unsafe_allow_html=True)
                     continue
                 if correction["type"] == "style":
-                    st.write(f"<div class='item-style' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: green'><b>{correction['suggestion']}</b></span><br><small>Style suggestion</small></div>",	unsafe_allow_html=True)
+                    st.write(f"<div class='item-style' title='{html.escape(suggestion)}'>{correction['error']} → <span style='color: green'><b>{correction['suggestion']}</b></span><br><small>Style suggestion</small></div>",	unsafe_allow_html=True)
                     continue
                 #else:
                 #    st.write(f"<div class='item-other' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: purple'><b>{correction['suggestion']}</b></span><br><small>Other</small></div>",	unsafe_allow_html=True)

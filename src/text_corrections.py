@@ -8,6 +8,7 @@ def get_corrections_llm():
     text = st.session_state["text"]
     prompt = f"""You are a language correction system. 
                  Given a text, identify each error (spelling, grammar, style, ...) and return them in structured JSON format.
+                 Don't include errors that are part of the citation or references.
                  Your response has to be processed as a string that directly becomes a JSON object.
                  Each error should be treated as a standalone unit and should include the following details:
                  - error: The exact error in the text.
@@ -86,7 +87,10 @@ def highlight_text_corrections(text, corrections):
             print(f"Skipping invalid correction: {correction}")
             continue
         
-        suggestion = html.escape(correction["suggestion"])
+        if correction["suggestion"] is not None:
+            suggestion = html.escape(correction["suggestion"])
+        else:
+            suggestion = ""
         
         if correction["type"] == "spelling":
             highlighted_text = (
