@@ -207,6 +207,9 @@
 	border-radius: 5px;
 }
 
+.argumentintext {
+	border-bottom: 3px solid orange;
+}
 
 .st-key-arguments_container {
 	color: rgb(8, 8, 8);

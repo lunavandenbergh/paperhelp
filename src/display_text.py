@@ -20,7 +20,7 @@ def display_feedback():
         arguments_container = st.container(height=600, border=False, key="arguments_container")
         arguments = st.session_state["arguments"]
         i = 0
-        for argument in arguments["arguments"]:
+        for argument in arguments:
             long_argument = argument['context']
             if st.session_state["updated_arguments"][i] == False:
                 with arguments_container:
@@ -29,8 +29,8 @@ def display_feedback():
                         st.markdown(f"Full argument: <strong>{long_argument.replace("*", "")}</strong>",unsafe_allow_html=True)
                         parts_argument_container = st.container(border=False, key=f"argument_parts_container_{i}")
                         with parts_argument_container:
-                            st.markdown(f"**Claim**: {argument['parts']['claim']}")
-                            st.markdown(f"**Evidence**: {argument['parts']['evidence']}")
+                            st.markdown(f"**Claim**: {argument['claim']}")
+                            st.markdown(f"**Evidence**: {argument['evidence']}")
                         improvements_container = st.container(border=False, key=f"improvements_container_{i}")
                         with improvements_container:
                             st.markdown(f"**What is wrong with this argument?** {argument['feedback']}")
@@ -49,8 +49,8 @@ def display_feedback():
                         st.markdown(f"Full argument: **{long_argument.replace("*", "")}**")
                         parts_argument_container = st.container(border=False, key=f"argument_parts_container_{i}")
                         with parts_argument_container:
-                            st.markdown(f"**Claim**: {argument['parts']['claim']}")
-                            st.markdown(f"**Evidence**: {argument['parts']['evidence']}")
+                            st.markdown(f"**Claim**: {argument['claim']}")
+                            st.markdown(f"**Evidence**: {argument['evidence']}")
                         improvements_container = st.container(border=False, key=f"improvements_container_{i}")
                         with improvements_container:
                             st.markdown(f"**What is wrong with this argument?** {argument['feedback']}")
@@ -98,7 +98,7 @@ def display_text():
         arguments = st.session_state["arguments"]
         text = st.session_state["text"]
         all_arguments = []
-        for argument in arguments["arguments"]:
+        for argument in arguments:
             all_arguments.append(argument['context'])
         corrections = []
         normalized_text = text.replace("\n", " ")
@@ -136,24 +136,13 @@ def display_text():
         st.markdown(st.session_state["text"], unsafe_allow_html=True)
         
 def display_message(text,citations):
-    updated_text = text
-    if bool(re.search(r"\[\d+\]", text)):
-        #citations_in_text = re.findall(r"\[\d+\]", text)
-        #for citation in citations_in_text:
-        #    number = citation[1]
-        #    citation_from_list = citations["urls"][int(number)-1]["url"]
-        #    updated_text = updated_text.replace(citation, 
-        #    # TODO link ipv span title
-        #        f"<span title='{citation_from_list}' style='border-bottom: 1px dashed blue;'>{citation}</span>")
-        st.write(updated_text, unsafe_allow_html=True)
-    else:
-        st.write(text)
+    st.write(text)
     display_citations(citations)
-    return updated_text
+    return text
     
 def display_citations(citations):
     with st.expander("Sources used for this answer"):
         i = 1
         for citation_url in citations.urls:
-            st.write(f"[{i}] {citation_url.url}") # TODO title of paper/website as link
+            st.write(f"[{i}] {citation_url.url}")
             i += 1

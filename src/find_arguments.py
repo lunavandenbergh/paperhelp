@@ -1,13 +1,19 @@
 import streamlit as st
 import json
+from pydantic import BaseModel
 
+class Argument(BaseModel):
+    context: str
+    claim: str
+    evidence: str
+    counterargument: str
+    feedback: str
+    actionable_feedback: str
 
 def generate_arguments():
     import google.genai
     text = st.session_state["text"]
-    prompt = f"""Given the user's paper draft, identify each distinct argument and return them in structured JSON format.
-                Your response has to be processed as a string that directly becomes a JSON object.
-                The JSON object should contain one	field called "arguments", which is a list of the arguments.
+    prompt = f"""Given the user's paper draft, identify each argument that could be improved.
                 Each argument should be treated as a standalone unit and should include the following details:
                 - context: The full argument. Please keep any mistakes or errors in the text as they are. Please keep the text as it is, within a single paragraph.
                 - parts: Breakdown of the argument into:
@@ -16,34 +22,63 @@ def generate_arguments():
                 - counterargument: Empty by default. This will be filled in later.
                 - feedback: Analysis of the arguments weaknesses, such as logical fallacies, lack of clarity, or weak evidence.
                 - actionable_feedback: Specific steps to improve the argument.
-																
-																The paper draft:	{text}"""
+                
+                The paper draft:	{text}"""
 
     client = google.genai.Client(api_key=str(st.secrets["GEMINI_API_KEY"]))
-    response = client.models.generate_content(
-         model="gemini-2.0-flash-lite", 
-         contents=prompt,
-    )
-    arguments = response.text
-    
+    try:
+        print("Trying gemini-2.0-flash...")
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=prompt,
+            config={
+                'response_mime_type': 'application/json',
+                'response_schema': list[Argument],
+            }
+        )
+        print("Response from gemini-2.0-flash: ", response)
+        arguments = response.text
+    except:
+        print("Error generating content with gemini-2.0-flash. Trying gemini-2.0-flash-lite...")
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.0-flash-lite", 
+                contents=prompt,
+                config={
+                'response_mime_type': 'application/json',
+                'response_schema': list[Argument],
+            }
+            )
+            arguments = response.text
+        except:
+            print("Error generating content with gemini-2.0-flash-lite. Trying gemini-1.5-flash...")
+            try:
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash", 
+                    contents=prompt,
+                    config={
+                'response_mime_type': 'application/json',
+                'response_schema': list[Argument],
+            }
+                )
+                arguments = response.text
+            except:
+                print("Error generating content with all three models.")
+                return
+    print(f"Response: {arguments}")
     # Clean up the response text
     if arguments.startswith("```json") and arguments.endswith("```"):
         arguments = arguments[7:-3].strip()
     try:
         st.session_state["arguments"] = json.loads(arguments)
-        st.session_state["updated_arguments"] = [False] * len(st.session_state["arguments"]["arguments"])
+        st.session_state["updated_arguments"] = [False] * len(st.session_state["arguments"])
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}. Retrying...")
         generate_arguments() 
-
-    agent = st.session_state["agent"]
-    query = f"Given the user's paper draft text, provide general feedback on it, no longer than 150 words. Don't cite anything."
-    general_feedback = agent.run(query)
-    st.session_state["general_feedback"] = general_feedback.content
         
 
 def generate_papers(argument_nr : int):
-    argument = st.session_state.arguments["arguments"][argument_nr]
+    argument = st.session_state["arguments"][argument_nr]
     agent = st.session_state["agent"]
 
     # Actually generate the papers
@@ -75,7 +110,7 @@ def generate_papers(argument_nr : int):
         generate_papers(argument_nr)  # Retry if there's an error
 
     argument["counterargument"] = response_json
-    st.session_state["arguments"]["arguments"][argument_nr] = argument
+    st.session_state["arguments"][argument_nr] = argument
     st.write(st.session_state["arguments"])
     
     # Update the session state to indicate that the argument has been updated

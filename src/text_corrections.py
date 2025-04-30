@@ -2,15 +2,24 @@ import json
 import re
 import streamlit as st
 import html
+from pydantic import BaseModel
+
+class Correction(BaseModel):
+    error: str
+    context: str
+    suggestion: str
+    offset: int
+    length: int
+    type: str
 
 def get_corrections_llm():
     import google.genai
     text = st.session_state["text"]
     prompt = f"""You are a language correction system. 
-                 Given a text, identify each error (spelling, grammar, style, ...) and return them in structured JSON format.
+                 Given a text, identify each error (spelling, grammar, style, ...).
                  Don't include errors that are part of the citation or references.
-                 Your response has to be processed as a string that directly becomes a JSON object.
-                 Each error should be treated as a standalone unit and should include the following details:
+                 Ignore errors pertaining to symbols used like \\n, etc.
+                 Each error should include the following details:
                  - error: The exact error in the text.
                  - context: The sentence	or containing the error.
                  - suggestion: The most likely suggestion	for the error.
@@ -21,19 +30,48 @@ def get_corrections_llm():
                  Here's the text: {text}"""
  
     client = google.genai.Client(api_key=str(st.secrets["GEMINI_API_KEY"]))
-    response = client.models.generate_content(
-         model="gemini-2.0-flash-lite", 
-         contents=prompt,
-    )
-    corrections = response.text
-    # Clean up the response text if it starts with ```json and ends with ```
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=prompt,
+            config={
+                'response_mime_type': 'application/json',
+                'response_schema': list[Correction],
+            }
+        )
+        corrections = response.text
+    except:
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.0-flash-lite", 
+                contents=prompt,
+                config={
+                'response_mime_type': 'application/json',
+                'response_schema': list[Correction],
+            }
+            )
+            corrections = response.text
+        except:
+            try:
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash", 
+                    contents=prompt,
+                    config={
+                'response_mime_type': 'application/json',
+                'response_schema': list[Correction],
+            }
+                )
+                corrections = response.text
+            except:
+                print("Error generating content with all three models.")
+                return
     if corrections.startswith("```json") and corrections.endswith("```"):
         corrections = corrections[7:-3].strip()
     try:
         st.session_state["corrections_llm"] = json.loads(corrections) 
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
-        get_corrections_llm()  # Retry if JSON decoding fails 
+        get_corrections_llm()  # Retry if something fails 
 
 
 def highlight_text_arguments(text, corrections):
@@ -48,9 +86,9 @@ def highlight_text_arguments(text, corrections):
             updated_text = ""
             for line in lines:
                 if lines.index(line) != len(lines) - 1:
-                    updated_text += f'<span style="border-bottom: 3px solid orange;">{line}</span>\n\n'
+                    updated_text += f'<span class="argumentintext">{line}</span>\n\n'
                 else:
-                    updated_text += f'<span style="border-bottom: 3px solid orange;">{line}</span>'
+                    updated_text += f'<span class="argumentintext">{line}</span>'
             highlighted_text = (
                 highlighted_text[:start] +
                 updated_text +
@@ -59,7 +97,7 @@ def highlight_text_arguments(text, corrections):
         else:
             highlighted_text = (
                 highlighted_text[:start] +
-                f'<span style="border-bottom: 3px solid orange;">{error_text}</span>' +
+                f'<span class="argumentintext">{error_text}</span>' +
                 highlighted_text[end:]
             )
         

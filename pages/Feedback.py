@@ -5,7 +5,6 @@ from textwrap import dedent
 from agno.models.perplexity import Perplexity
 from src.display_text import display_citations, display_feedback, display_message, display_text
 from src.find_arguments import	generate_arguments
-import re
 
 tic_overall = time.time()
 print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
@@ -13,7 +12,7 @@ print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime(
 st.set_page_config(
     page_title="Paper Feedback Tool", 
     page_icon="📄",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="auto",
     layout="wide")
 
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
@@ -82,6 +81,12 @@ if "agent"	not in st.session_state:
     toc = time.time()
     print(f"Initializing agent took {toc - tic:.2f} seconds")
 
+if "general_feedback" not in st.session_state:
+    agent = st.session_state["agent"]
+    query = f"Given the user's paper draft text, provide general feedback on it, no longer than 150 words. Don't cite anything."
+    general_feedback = agent.run(query)
+    st.session_state["general_feedback"] = general_feedback.content
+
 if "corrections_llm" not in st.session_state:
     tic = time.time()
     from src.text_corrections import get_corrections_llm
@@ -92,7 +97,7 @@ if "corrections_llm" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or relevant literature.", "citations": None}]
 
-if "arguments" not in st.session_state or not isinstance(st.session_state["arguments"], dict):
+if "arguments" not in st.session_state:
     tic = time.time()
     generate_arguments()
     toc = time.time()
