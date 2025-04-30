@@ -22,7 +22,7 @@ def get_corrections_llm():
  
     client = google.genai.Client(api_key=str(st.secrets["GEMINI_API_KEY"]))
     response = client.models.generate_content(
-         model="gemini-2.0-flash", 
+         model="gemini-2.0-flash-lite", 
          contents=prompt,
     )
     corrections = response.text
