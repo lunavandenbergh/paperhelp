@@ -41,6 +41,25 @@ if st.session_state["dry_run"] == True:
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
 
+if st.session_state["feedback_type"] == "General":
+    st.markdown('''<style>
+        .st-key-general button {
+	       color: grey;
+        border: 1px solid grey;
+        }</style>''', unsafe_allow_html=True)
+if st.session_state["feedback_type"] == "Arguments":
+				st.markdown('''<style>
+        .st-key-args button {
+	       color: grey;
+        border: 1px solid grey;
+        }</style>''', unsafe_allow_html=True)
+if st.session_state["feedback_type"] == "Corrections":
+				st.markdown('''<style>
+        .st-key-correct button {
+	       color: grey;
+        border: 1px solid grey;
+        }</style>''', unsafe_allow_html=True)
+
 if "agent"	not in st.session_state:
     tic = time.time()
 

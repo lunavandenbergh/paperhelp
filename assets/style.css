@@ -53,17 +53,6 @@
 	font-family: "Poppins", sans-serif;
 }
 
-.st-key-correct	button:hover,
-.st-key-args	button:hover,
-.st-key-style	button:hover,
-.st-key-general	button:hover {
-	background-color: #f3f3f3;
-	border: 1px	solid #d2d2d2;
-	font-size: 15px;
- border-radius: 8px;
- box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
 .st-key-general_feedback_container {
 	border-left: grey 2px solid;
 	background-color: #f8f8f8;

@@ -14,6 +14,7 @@ def generate_arguments():
     import google.genai
     text = st.session_state["text"]
     prompt = f"""Given the user's paper draft, identify each argument that could be improved.
+                 Keep the length of the arguments to a maximum of a few sentences.
                 Each argument should be treated as a standalone unit and should include the following details:
                 - context: The full argument. Please keep any mistakes or errors in the text as they are. Please keep the text as it is, within a single paragraph.
                 - parts: Breakdown of the argument into:
