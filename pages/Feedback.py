@@ -12,7 +12,7 @@ print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime(
 st.set_page_config(
     page_title="Paper Feedback Tool", 
     page_icon="📄",
-    initial_sidebar_state="auto",
+    initial_sidebar_state="collapsed",
     layout="wide")
 
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
@@ -122,7 +122,7 @@ if "arguments" not in st.session_state:
     toc = time.time()
     print(f"Argument generation took {toc - tic:.2f} seconds")
 
-left_col, right_col = st.columns(spec=[8,5],border=True)
+left_col, right_col = st.columns(spec=[8,6],border=True)
 
 with left_col:
     st.subheader("Your Paper")
