@@ -15,13 +15,12 @@ class Correction(BaseModel):
 def get_corrections_llm():
     import google.genai
     text = st.session_state["text"]
-    prompt = f"""You are a language correction system. 
-                 Given a text, identify each error (spelling, grammar, style, ...).
+    prompt = f"""You are a language correction system. Given a text, identify each error (spelling, grammar, style, ...).
                  Don't include errors that are part of the citation or references.
-                 Ignore errors pertaining to symbols used like \\n, etc.
+                 Ignore errors pertaining to symbols used like \\n, hyphens to split words between lines, ....
                  Each error should include the following details:
                  - error: The exact error in the text.
-                 - context: The sentence	or containing the error.
+                 - context: Few words before and after the text containing the error.
                  - suggestion: The most likely suggestion	for the error.
                  - offset: The starting position of the error in the text, counted in characters from the start of the text.
                  - length: The length of the error in the text.
@@ -107,19 +106,26 @@ def highlight_text_arguments(text, corrections):
 def highlight_text_corrections(text, corrections):
     highlighted_text = text
     normalized_text = highlighted_text.replace("\n", " ")
+    normalized_text = normalized_text.replace("’", "'")
     
     for correction in sorted(corrections, key=lambda x: x["offset"], reverse=True):
         normalized_context = correction["context"].replace("\n", " ")
-        context_start = normalized_text.find(normalized_context)
-        error_incontext = normalized_context.find(correction["error"])
+
+        error = correction["error"]
+        if normalized_text.count(error) == 1:
+            start = normalized_text.find(error)
+            end = start + correction["length"]
+        else:
+            context_start = normalized_text.find(normalized_context)
+            error_incontext = normalized_context.find(correction["error"])
         
-        if context_start == -1 or error_incontext == -1:
-            print(f"Failed to process correction: {correction}")
-            continue
-        
-        calculated_offset = context_start + error_incontext
-        start = calculated_offset
-        end = start + correction["length"]
+            if context_start == -1 or error_incontext == -1:
+                print(f"Failed to process correction: {correction}")
+                continue
+            else:
+                calculated_offset = context_start + error_incontext
+                start = calculated_offset
+                end = start + correction["length"]
         
         if start < 0 or end > len(highlighted_text):
             print(f"Skipping invalid correction: {correction}")
@@ -129,6 +135,9 @@ def highlight_text_corrections(text, corrections):
             suggestion = html.escape(correction["suggestion"])
         else:
             suggestion = ""
+            
+        if "\n" in correction["error"]:
+            continue
         
         if correction["type"] == "spelling":
             highlighted_text = (

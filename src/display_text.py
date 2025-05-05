@@ -4,9 +4,6 @@ import streamlit	as st
 from src.text_corrections import highlight_text_arguments, highlight_text_corrections
 from src.find_arguments import generate_papers
 
-def ignore_correction(start, end):
-    st.session_state["ignored_corrections"].append((start, end))
-
 def display_feedback():
     
     feedback_type = st.session_state["feedback_type"]
@@ -17,7 +14,7 @@ def display_feedback():
             st.markdown(st.session_state['general_feedback'])
 
     if feedback_type == "Arguments":
-        arguments_container = st.container(height=600, border=False, key="arguments_container")
+        arguments_container = st.container(height=650, border=False, key="arguments_container")
         arguments = st.session_state["arguments"]
         i = 0
         for argument in arguments:
@@ -69,13 +66,15 @@ def display_feedback():
 
     if feedback_type == "Corrections":
         corrections_llm = st.session_state["corrections_llm"]
-        corrections_container = st.container(height=600, border=False)
+        corrections_container = st.container(height=650, border=False)
         with corrections_container:
             for correction in corrections_llm:
                 if correction["suggestion"] is not None:
                     suggestion	= html.escape(correction["suggestion"])
                 else:
                     suggestion = ""
+                if "\n" in correction['error']:
+                    continue
                 if correction["type"] == "spelling":
                     st.write(f"<div class='item-spelling' title='{html.escape(suggestion)}'>{correction['error']} → <span style='color: red'><b>{correction['suggestion']}</b></span><br><small>Spelling mistake</small></div>",	unsafe_allow_html=True)
                     continue
@@ -123,9 +122,21 @@ def display_text():
                         "type": "argument"
                     })
                 else:
-                    print(f"-------")
-                    print(f"Could not find argument: {arg}")
-      
+                    update_normalizes_text = normalized_text
+                    counter = update_normalizes_text.count("  ")
+                    update_normalizes_text = update_normalizes_text.replace("  ", " ")
+                    start = update_normalizes_text.find(arg)
+                    if start != -1:
+                        corrections.append({
+                        "error": arg.replace('\n',' '),
+                        "suggestion": ["Correction"],
+                        "offset": start + counter,
+                        "length": len(arg),
+                        "type": "argument"
+                        })
+                    else:
+                        print(f"Could not find argument: {arg}")
+                        print(f"-------")
         highlighted_text = highlight_text_arguments(st.session_state["text"], corrections)
         st.markdown(highlighted_text, unsafe_allow_html=True)
     elif feedback_type == "Corrections":

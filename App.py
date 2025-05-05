@@ -42,36 +42,21 @@ if uploaded_file is not None:
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    import re
-    import pymupdf4llm
-    
     import pymupdf
 
-    doc = pymupdf.open(save_path) # open a document
-    out = open("output.txt", "wb") # create a text output
-    for page in doc: # iterate the document pages
-        text = page.get_text().encode("utf8") # get plain text (is in UTF-8)
-        out.write(text) # write text of page
-        #out.write(bytes("-----")) # write page delimiter (form feed 0x0C)
+    doc = pymupdf.open(save_path)
+    out = open("output.txt", "wb")
+    for page in doc:
+        text = page.get_text().encode("utf8")
+        out.write(text)
     out.close()
     file_path = 'output.txt'
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding="utf8") as file:
         lines = file.readlines()
         file_content = '\n'.join(lines)
-    print(file_content)
+    
     st.session_state["text"] = file_content
-
-    #text = pymupdf4llm.to_markdown(save_path, hdr_info=False)
-    #text = re.sub(r'\$', r'\\$', text)
-    #text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text) # Remove newlines within paragraphs
-    #text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text) # Join hyphenated words
-    
-    #text = text.replace("# ", "### ") # Make sure title is a header
-    #text = text.replace("#######", "######") # Make sure smallest header	is a header
-    
-    #st.session_state["text"] = text
-    st.session_state["pdf_path"] = uploaded_file.name  
-    
+    st.session_state["pdf_path"] = uploaded_file.name
     st.session_state["dry_run"] = False
     
     print(f"Going to the next page... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")

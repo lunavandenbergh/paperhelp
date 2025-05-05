@@ -12,7 +12,7 @@ print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime(
 st.set_page_config(
     page_title="Paper Feedback Tool", 
     page_icon="📄",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="auto",
     layout="wide")
 
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
@@ -21,22 +21,22 @@ st.title("Paper Feedback Tool")
 
 @st.dialog("Your paper feedback is ready!")
 def instructions():
-				st.write("")
-				st.write("On the left, you can see your paper draft, and on the right, you can choose between three types of feedback:")
-				st.write("1. **General**: General feedback on your paper draft.")
-				st.write("2. **Arguments**: Feedback on the different arguments in your paper draft. You will find a list of arguments present in your paper draft, and for each argument, you will receive feedback seperately.")
-				st.write("3. **Corrections**: Corrections for spelling, grammar, and style in your paper draft.")
-				st.write("A **feedback assistant** is available in the sidebar. You can ask it anything about your paper draft or relevant literature.")
+    st.write("")
+    st.write("On the left, you can see your paper draft, and on the right, you can choose between three types of feedback:")
+    st.write("1. **General**: General feedback on your paper draft.")
+    st.write("2. **Arguments**: Feedback on the different arguments in your paper draft. You will find a list of arguments present in your paper draft, and for each argument, you will receive feedback seperately.")
+    st.write("3. **Corrections**: Corrections for spelling, grammar, and style in your paper draft.")
+    st.write("A **feedback assistant** is available in the sidebar. You can ask it anything about your paper draft or relevant literature.")
 
 if st.session_state["dry_run"] == True:
-				st.session_state["feedback_type"] = "General"
-				st.session_state["arguments"] = {"arguments": [{"context" : "This is context.",
+    st.session_state["feedback_type"] = "General"
+    st.session_state["arguments"] = {"arguments": [{"context" : "This is context.",
                                                     "parts" : {"claim" : "This is claim.", "evidence" : "This is evidence."},
-																																																				"counterargument" : "This is counterargument.",
-																																																				"feedback" : "This is feedback.",
-																																																				"actionable_feedback" : "This is actionable feedback."}]}
-				st.session_state["general_feedback"] = "This is general feedback."
-				st.session_state["corrections_llm"] = []
+                                                    "counterargument" : "This is counterargument.",
+                                                    "feedback" : "This is feedback.",
+                                                    "actionable_feedback" : "This is actionable feedback."}]}
+    st.session_state["general_feedback"] = "This is general feedback."
+    st.session_state["corrections_llm"] = []
 
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
@@ -44,19 +44,19 @@ if "feedback_type" not in st.session_state:
 if st.session_state["feedback_type"] == "General":
     st.markdown('''<style>
         .st-key-general button {
-	       color: grey;
+        color: grey;
         border: 1px solid grey;
         }</style>''', unsafe_allow_html=True)
 if st.session_state["feedback_type"] == "Arguments":
-				st.markdown('''<style>
+    st.markdown('''<style>
         .st-key-args button {
-	       color: grey;
+        color: grey;
         border: 1px solid grey;
         }</style>''', unsafe_allow_html=True)
 if st.session_state["feedback_type"] == "Corrections":
-				st.markdown('''<style>
+    st.markdown('''<style>
         .st-key-correct button {
-	       color: grey;
+        color: grey;
         border: 1px solid grey;
         }</style>''', unsafe_allow_html=True)
 
@@ -69,11 +69,11 @@ if "agent"	not in st.session_state:
         description=dedent(f"""\
             You are an academic assistant that provides feedback on research paper drafts. 
             The user has uploaded a draft, which is at the end of this description.
-												This can be a scientific paper, a thesis, or any other type of research-related document.
-												It is important to note that it can also be part of a larger document. 
-												Please keep this in mind when providing feedback.
+            This can be a scientific paper, a thesis, or any other type of research-related document.
+            It is important to note that it can also be part of a larger document. 
+            Please keep this in mind when providing feedback.
             You can be asked by the system to provide feedback on the paper,
-												but you can also be asked anything else by the user.
+            but you can also be asked anything else by the user.
 
             You also can be asked to generate new text or provide scientific papers on a certain topic. 
                        
@@ -92,7 +92,7 @@ if "agent"	not in st.session_state:
             "When asked a question about the user's paper, first search your memory.",
             "When asked about existing literature, provide scientific papers from reliable sources.",
             "Always provide scientific citations.",
-												"Make sure not to go over 1024 tokens in your response.",],
+            "Make sure not to go over 1024 tokens in your response.",],
         markdown=True,
     )
     
@@ -126,7 +126,7 @@ left_col, right_col = st.columns(spec=[8,6],border=True)
 
 with left_col:
     st.subheader("Your Paper")
-    text_container = st.container(height=655,border=False, key="text_container")
+    text_container = st.container(height=705,border=False, key="text_container")
     with text_container:
         display_text()
 
