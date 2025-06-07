@@ -1,10 +1,25 @@
+"""
+Feedback.py
+
+This Streamlit page displays the main feedback interface for the paper feedback application.
+It shows the uploaded paper, provides three types of AI-generated feedback (General, Arguments, Corrections),
+and includes a chat-based feedback assistant.
+
+Features:
+- Displays uploaded paper text
+- Provides general, argument-based, and correction feedback
+- Interactive chat assistant for further questions and literature search
+- Session state management for feedback, arguments, corrections, and chat history
+- Custom CSS styling
+"""
+
 import time
 import streamlit as st
 from agno.agent import Agent
 from textwrap import dedent
 from agno.models.perplexity import Perplexity
 from src.display_text import display_citations, display_feedback, display_message, display_text
-from src.find_arguments import	generate_arguments
+from src.find_arguments import generate_arguments
 
 tic_overall = time.time()
 print(f"Starting the app... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
@@ -13,21 +28,27 @@ st.set_page_config(
     page_title="Paper Feedback Tool", 
     page_icon="📄",
     initial_sidebar_state="auto",
-    layout="wide")
+    layout="wide"
+)
 
+# Load custom CSS for styling
 st.markdown('<style>' + open('assets/style.css').read() + '</style>', unsafe_allow_html=True)
 
 st.title("Paper Feedback Tool")
 
 @st.dialog("Your paper feedback is ready!")
 def instructions():
+    """
+    Displays instructions for using the feedback tool in a dialog.
+    """
     st.write("")
     st.write("On the left, you can see your paper draft, and on the right, you can choose between three types of feedback:")
     st.write("1. **General**: General feedback on your paper draft.")
-    st.write("2. **Arguments**: Feedback on the different arguments in your paper draft. You will find a list of arguments present in your paper draft, and for each argument, you will receive feedback seperately.")
+    st.write("2. **Arguments**: Feedback on the different arguments in your paper draft. You will find a list of arguments present in your paper draft, and for each argument, you will receive feedback separately.")
     st.write("3. **Corrections**: Corrections for spelling, grammar, and style in your paper draft.")
     st.write("A **feedback assistant** is available in the sidebar. You can ask it anything about your paper draft or relevant literature.")
 
+# Initialize session state for dry run/testing
 if st.session_state["dry_run"] == True:
     st.session_state["feedback_type"] = "General"
     st.session_state["arguments"] = {"arguments": [{"context" : "This is context.",
@@ -38,9 +59,11 @@ if st.session_state["dry_run"] == True:
     st.session_state["general_feedback"] = "This is general feedback."
     st.session_state["corrections_llm"] = []
 
+# Set default feedback type if not set
 if "feedback_type" not in st.session_state:
     st.session_state["feedback_type"] = "General"
 
+# Apply custom button styles based on selected feedback type
 if st.session_state["feedback_type"] == "General":
     st.markdown('''<style>
         .st-key-general button {
@@ -60,13 +83,13 @@ if st.session_state["feedback_type"] == "Corrections":
         border: 1px solid grey;
         }</style>''', unsafe_allow_html=True)
 
-if "agent"	not in st.session_state:
+# Initialize the feedback agent if not already in session state
+if "agent" not in st.session_state:
     tic = time.time()
-
     researcher = Agent(
-        model=Perplexity(id="sonar-pro",api_key=st.secrets["PERPLEXITY_API_KEY"]),
+        model=Perplexity(id="sonar-pro", api_key=st.secrets["PERPLEXITY_API_KEY"]),
         debug_mode=True,
-        description=dedent(f"""\
+        description=dedent(f"""
             You are an academic assistant that provides feedback on research paper drafts. 
             The user has uploaded a draft, which is at the end of this description.
             This can be a scientific paper, a thesis, or any other type of research-related document.
@@ -92,20 +115,22 @@ if "agent"	not in st.session_state:
             "When asked a question about the user's paper, first search your memory.",
             "When asked about existing literature, provide scientific papers from reliable sources.",
             "Always provide scientific citations.",
-            "Make sure not to go over 1024 tokens in your response.",],
+            "Make sure not to go over 1024 tokens in your response.",
+        ],
         markdown=True,
     )
-    
     st.session_state["agent"] = researcher
     toc = time.time()
     print(f"Initializing agent took {toc - tic:.2f} seconds")
 
+# Generate general feedback if not already present
 if "general_feedback" not in st.session_state:
     agent = st.session_state["agent"]
     query = f"Given the user's paper draft text, provide general feedback on it, no longer than 150 words. Don't cite anything."
     general_feedback = agent.run(query)
     st.session_state["general_feedback"] = general_feedback.content
 
+# Generate corrections using LLM if not already present
 if "corrections_llm" not in st.session_state:
     tic = time.time()
     from src.text_corrections import get_corrections_llm
@@ -113,20 +138,27 @@ if "corrections_llm" not in st.session_state:
     toc = time.time()
     print(f"Text correction (llm) took {toc - tic:.2f} seconds")
 
+# Initialize chat messages if not already present
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or relevant literature.", "citations": None}]
+    st.session_state.messages = [{
+        "role": "assistant",
+        "content": "Welcome! How can I help you? You can ask me anything about the paper you provided or relevant literature.",
+        "citations": None
+    }]
 
+# Generate arguments if not already present
 if "arguments" not in st.session_state:
     tic = time.time()
     generate_arguments()
     toc = time.time()
     print(f"Argument generation took {toc - tic:.2f} seconds")
 
-left_col, right_col = st.columns(spec=[8,6],border=True)
+# Layout: left column (paper), right column (feedback), sidebar (chat)
+left_col, right_col = st.columns(spec=[8,6], border=True)
 
 with left_col:
     st.subheader("Your Paper")
-    text_container = st.container(height=705,border=False, key="text_container")
+    text_container = st.container(height=705, border=False, key="text_container")
     with text_container:
         display_text()
 
@@ -141,6 +173,7 @@ with st.sidebar:
                     st.write(message["content"], unsafe_allow_html=True) 
                     if message["role"] == "assistant" and message["citations"] is not None:
                         display_citations(message["citations"])
+        # Handle chat input and response
         if prompt := st.chat_input("Ask me about your pdf!"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with chat:
@@ -153,7 +186,7 @@ with st.sidebar:
                         st.session_state["test_citations"] = response.citations
                         message = display_message(response.content, response.citations)
                 st.session_state.messages.append({"role": "assistant", "content": message, "citations": response.citations})
-    
+
 with right_col:
     st.subheader("Feedback")
     col_but1, col_but2, col_but3 = st.columns([1,1,1], vertical_alignment="center")
@@ -169,13 +202,12 @@ with right_col:
         if st.button("Corrections", key="correct", type="secondary"):
             st.session_state["feedback_type"] = "Corrections"
             st.rerun()
-            
     display_feedback()
 
+# Show instructions dialog on first load
 if "instructions_done" not in st.session_state:
     instructions()
     st.session_state["instructions_done"] = True
 
 toc_overall = time.time()
 print(f"Overall execution time: {toc_overall - tic_overall:.2f} seconds")
-    

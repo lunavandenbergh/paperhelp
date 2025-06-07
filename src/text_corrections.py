@@ -1,3 +1,15 @@
+"""
+text_corrections.py
+
+Provides functions and models for extracting, highlighting, and displaying text corrections
+(spelling, grammar, style, etc.) in the paper feedback applications. Uses LLMs (Google Gemini) to
+identify errors and generate suggestions.
+
+Features:
+- Extracts corrections from paper drafts using LLMs
+- Highlights arguments and corrections in the paper text
+"""
+
 import json
 import re
 import streamlit as st
@@ -5,6 +17,17 @@ import html
 from pydantic import BaseModel
 
 class Correction(BaseModel):
+    """
+    Data model for representing a correction in the text.
+
+    Attributes:
+        error (str): The exact error in the text.
+        context (str): Few words before and after the error.
+        suggestion (str): Suggested correction.
+        offset (int): Starting position of the error in the text.
+        length (int): Length of the error.
+        type (str): Type of error (spelling, grammar, style, etc.).
+    """
     error: str
     context: str
     suggestion: str
@@ -13,6 +36,10 @@ class Correction(BaseModel):
     type: str
 
 def get_corrections_llm():
+    """
+    Uses Google Gemini LLM to extract corrections from the user's paper draft.
+    Stores the results in Streamlit session state as a list of corrections.
+    """
     import google.genai
     text = st.session_state["text"]
     prompt = f"""You are a language correction system. Given a text, identify each error (spelling, grammar, style, ...).
@@ -72,14 +99,20 @@ def get_corrections_llm():
         print(f"Error decoding JSON: {e}")
         get_corrections_llm()  # Retry if something fails 
 
-
 def highlight_text_arguments(text, corrections):
+    """
+    Highlights argument sections in the text using HTML spans.
+
+    Args:
+        text (str): The original text.
+        corrections (list): List of corrections (dicts) with offset and length.
+    """
     highlighted_text = text
     for correction in sorted(corrections, key=lambda x: x["offset"], reverse=True):
         start = correction["offset"]
         end = start + correction["length"]
         error_text = text[start:end]
-        # als er \n in de tekst staat, span aflsuiten en volgende lijn in een nieuwe span zetten
+        # If there are double newlines, split and wrap each line separately
         if "\n\n" in error_text:
             lines = error_text.split("\n\n")
             updated_text = ""
@@ -102,8 +135,17 @@ def highlight_text_arguments(text, corrections):
         
     return highlighted_text
 
-
 def highlight_text_corrections(text, corrections):
+    """
+    Highlights corrections in the text using colored underlines for different error types.
+
+    Args:
+        text (str): The original text.
+        corrections (list): List of corrections (dicts) with offset, length, type, and suggestion.
+
+    Returns:
+        str: The text with corrections highlighted.
+    """
     highlighted_text = text
     normalized_text = highlighted_text.replace("\n", " ")
     normalized_text = normalized_text.replace("’", "'")
@@ -139,6 +181,7 @@ def highlight_text_corrections(text, corrections):
         if "\n" in correction["error"]:
             continue
         
+        # Highlight based on error type
         if correction["type"] == "spelling":
             highlighted_text = (
                 highlighted_text[:start] +

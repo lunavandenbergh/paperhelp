@@ -1,3 +1,16 @@
+"""
+App.py
+
+Main entry point for the paper feedback application.
+Allows users to upload a PDF of their scientific paper draft,
+extracts the text, and prepares it for AI-generated feedback.
+
+Features:
+- PDF upload and text extraction
+- Session state management
+- File cleanup on startup
+"""
+
 import shutil
 import streamlit as st
 import os
@@ -23,6 +36,10 @@ with explanation:
     uploaded_file = st.file_uploader("Upload your paper in PDF format here:", type="pdf", key="file_uploader_text")
 
 def initialize_app():
+    """
+    Cleans up the 'uploads' directory by removing all files and subdirectories.
+    This ensures a fresh state each time the app is started.
+    """
     for filename in os.listdir("uploads"):
         file_path = os.path.join("uploads", filename)
         try:
@@ -38,12 +55,14 @@ if "files_initialized" not in st.session_state:
     st.session_state["files_initialized"] = True
 
 if uploaded_file is not None:
+    # Save uploaded PDF to 'uploads' directory
     save_path = os.path.join("uploads", uploaded_file.name)
     with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    import pymupdf
+    import pymupdf  # Used for PDF text extraction
 
+    # Extract text from PDF and save to output.txt
     doc = pymupdf.open(save_path)
     out = open("output.txt", "wb")
     for page in doc:
@@ -55,10 +74,11 @@ if uploaded_file is not None:
         lines = file.readlines()
         file_content = '\n'.join(lines)
     
+    # Store extracted text and file info in session state
     st.session_state["text"] = file_content
     st.session_state["pdf_path"] = uploaded_file.name
     st.session_state["dry_run"] = False
     
+    # Switch to feedback page after processing
     print(f"Going to the next page... It's now {time.localtime().tm_hour}:{time.localtime().tm_min}:{time.localtime().tm_sec}")
     st.switch_page("pages/Feedback.py")
-    

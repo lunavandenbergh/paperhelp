@@ -1,8 +1,30 @@
+"""
+find_arguments.py
+
+Provides functions and models for extracting and improving arguments from a user's paper draft.
+Handles argument extraction using LLMs (Google Gemini), and generates relevant literature suggestions.
+
+Features:
+- Extracts arguments from paper drafts using LLMs
+- Generates relevant scientific papers to improve or counter arguments
+"""
+
 import streamlit as st
 import json
 from pydantic import BaseModel
 
 class Argument(BaseModel):
+    """
+    Data model for representing an argument extracted from a paper draft.
+
+    Attributes:
+        context (str): The full argument text.
+        claim (str): The statement being argued.
+        evidence (str): Support for the claim.
+        counterargument (str): Counterargument or relevant literature (filled later).
+        feedback (str): Analysis of weaknesses in the argument.
+        actionable_feedback (str): Specific steps to improve the argument.
+    """
     context: str
     claim: str
     evidence: str
@@ -11,6 +33,13 @@ class Argument(BaseModel):
     actionable_feedback: str
 
 def generate_arguments():
+    """
+    Extracts arguments from the user's paper draft using Google Gemini LLM.
+    Stores the results in Streamlit session state as a list of arguments.
+
+    Handles retries with different Gemini models if the first attempt fails.
+    Cleans up and parses the LLM response as JSON.
+    """
     import google.genai
     text = st.session_state["text"]
     prompt = f"""Given the user's paper draft, identify each argument that could be improved.
@@ -79,6 +108,12 @@ def generate_arguments():
         
 
 def generate_papers(argument_nr : int):
+    """
+    Generates a list of relevant scientific papers to improve or counter a given argument.
+
+    Args:
+        argument_nr (int): The index of the argument in st.session_state["arguments"].
+    """
     argument = st.session_state["arguments"][argument_nr]
     agent = st.session_state["agent"]
 

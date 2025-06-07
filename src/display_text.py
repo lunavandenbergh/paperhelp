@@ -1,15 +1,31 @@
+"""
+display_text.py
+
+Provides Streamlit display functions for the paper feedback application.
+Handles rendering of feedback, highlighting of arguments and corrections,
+and displaying citations and chat messages.
+
+Features:
+- Displays general, argument-based, and correction feedback
+- Highlights arguments and corrections in the paper text
+- Displays chat messages and citations
+"""
+
 import html
 import re
-import streamlit	as st
+import streamlit as st
 from src.text_corrections import highlight_text_arguments, highlight_text_corrections
 from src.find_arguments import generate_papers
 
 def display_feedback():
-    
+    """
+    Displays feedback based on the selected feedback type.
+    Shows general feedback, argument feedback (with literature loading), or corrections.
+    """
     feedback_type = st.session_state["feedback_type"]
 
     if feedback_type == "General":
-        general_feedback_container	= st.container(border=False, key="general_feedback_container")
+        general_feedback_container = st.container(border=False, key="general_feedback_container")
         with general_feedback_container:
             st.markdown(st.session_state['general_feedback'])
 
@@ -23,7 +39,7 @@ def display_feedback():
                 with arguments_container:
                     argument_container = st.container(border=False, key=f"argument_container_{i}")
                     with argument_container:
-                        st.markdown(f"Full argument: <strong>{long_argument.replace("*", "")}</strong>",unsafe_allow_html=True)
+                        st.markdown(f"Full argument: <strong>{long_argument.replace('*', '')}</strong>", unsafe_allow_html=True)
                         parts_argument_container = st.container(border=False, key=f"argument_parts_container_{i}")
                         with parts_argument_container:
                             st.markdown(f"**Claim**: {argument['claim']}")
@@ -43,7 +59,7 @@ def display_feedback():
                 with arguments_container:
                     argument_container = st.container(border=False, key=f"argument_container_{i}")
                     with argument_container:
-                        st.markdown(f"Full argument: **{long_argument.replace("*", "")}**")
+                        st.markdown(f"Full argument: **{long_argument.replace('*', '')}**")
                         parts_argument_container = st.container(border=False, key=f"argument_parts_container_{i}")
                         with parts_argument_container:
                             st.markdown(f"**Claim**: {argument['claim']}")
@@ -70,7 +86,7 @@ def display_feedback():
         with corrections_container:
             for correction in corrections_llm:
                 if correction["suggestion"] is not None:
-                    suggestion	= html.escape(correction["suggestion"])
+                    suggestion = html.escape(correction["suggestion"])
                 else:
                     suggestion = ""
                 if "\n" in correction['error']:
@@ -88,7 +104,12 @@ def display_feedback():
                 #    st.write(f"<div class='item-other' title='{html.escape(correction['suggestion'])}'>{correction['error']} → <span style='color: purple'><b>{correction['suggestion']}</b></span><br><small>Other</small></div>",	unsafe_allow_html=True)
             
 def display_text():
-    
+    """
+    Displays the paper text with highlights based on the selected feedback type.
+    - For 'General': shows the plain text.
+    - For 'Arguments': highlights argument sections.
+    - For 'Corrections': highlights corrections.
+    """
     feedback_type = st.session_state["feedback_type"]
 
     if feedback_type == "General":
@@ -146,12 +167,27 @@ def display_text():
     else:
         st.markdown(st.session_state["text"], unsafe_allow_html=True)
         
-def display_message(text,citations):
+def display_message(text, citations):
+    """
+    Displays a chat message and its citations.
+    
+    Args:
+        text: The message text.
+        citations: Citations object to display.
+    Returns:
+        str: The displayed text.
+    """
     st.write(text)
     display_citations(citations)
     return text
     
 def display_citations(citations):
+    """
+    Displays a list of citation URLs in an expandable section.
+    
+    Args:
+        citations: Citations object with a .urls attribute.
+    """
     with st.expander("Sources used for this answer"):
         i = 1
         for citation_url in citations.urls:
